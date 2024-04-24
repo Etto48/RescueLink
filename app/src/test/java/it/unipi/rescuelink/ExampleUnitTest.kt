@@ -1,4 +1,4 @@
-package org.unipi.rescuelink
+package it.unipi.rescuelink
 
 import org.junit.Test
 
