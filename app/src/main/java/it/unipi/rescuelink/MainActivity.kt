@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import it.unipi.location.LocationActivity
 import it.unipi.location.LocationUpdateService
 
 class MainActivity : AppCompatActivity() {
@@ -28,12 +29,14 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener {v -> this.testService(v)}
 
-        val serviceIntent = Intent(this, LocationUpdateService::class.java)
-        bindService(serviceIntent, connection, BIND_AUTO_CREATE)
-        startService(serviceIntent)
+
+        val button = findViewById<Button>(R.id.button)
+        button.setOnClickListener {v -> this.changeToLocationView(v)}
+
+        //val serviceIntent = Intent(this, LocationUpdateService::class.java)
+        //bindService(serviceIntent, connection, BIND_AUTO_CREATE)
+        //startService(serviceIntent)
         val pos_tag = findViewById<TextView>(R.id.position)
         pos_tag.text = "0"
 
@@ -67,6 +70,11 @@ class MainActivity : AppCompatActivity() {
     {
         Log.d(null, "Changing to map view")
         startActivity(Intent(this, MapsActivity::class.java))
+    }
+
+    private fun changeToLocationView(v: View?){
+        Log.d(null, "Changing to location view")
+        startActivity(Intent(this, LocationActivity::class.java))
     }
 
     private fun testService(v: View?){

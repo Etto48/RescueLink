@@ -20,7 +20,7 @@ class LocationUpdateService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var myRequest: LocationRequest
 
-    var location : Location? = null
+    var loc : Location? = null
 
     fun getLocation(): Location? {
         try {
@@ -30,35 +30,19 @@ class LocationUpdateService : Service() {
             )
 
             locTask.addOnSuccessListener {
-                location = it
+                loc = it
                 it?.let {
                     sendLocationBroadcast(it)
                 }
-                Log.i(TAG, " - Current Location: ${location?.latitude} ${location?.longitude}")
+                Log.i(TAG, " - Current Location: ${loc?.latitude} ${loc?.longitude}")
             }
 
-            return location
+            return loc
         }
         catch (e: SecurityException){
             Log.e(TAG, "Security Exception")
             e.printStackTrace()
             return null
-        }
-    }
-
-    private fun sendLocationBroadcast(it: Location) {
-        val intent = Intent(LOCATION_UPDATE_ACTION)
-        intent.putExtra(LOCATION_LATITUDE, it.latitude)
-        intent.putExtra(LOCATION_LONGITUDE, it.longitude)
-        sendBroadcast(intent)
-    }
-
-    inner class LocalBinder : Binder() {
-        internal val service: LocationUpdateService
-            get() = this@LocationUpdateService
-
-        fun getService(): LocationUpdateService {
-            return this@LocationUpdateService
         }
     }
 
@@ -83,12 +67,8 @@ class LocationUpdateService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopLocationUpdates()
         Log.i(TAG, "Service destroyed")
-    }
-
-    fun stopLocationUpdates(){
-        Log.i(TAG, "Stopping location updates")
-        fusedLocationClient.removeLocationUpdates(callback)
     }
 
     fun startLocationUpdates(){
@@ -104,6 +84,11 @@ class LocationUpdateService : Service() {
         }
     }
 
+    fun stopLocationUpdates(){
+        Log.i(TAG, "Stopping location updates")
+        fusedLocationClient.removeLocationUpdates(callback)
+    }
+
     private val callback = object: LocationCallback(){
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
@@ -111,8 +96,23 @@ class LocationUpdateService : Service() {
             for (location in locationResult.locations)
                 Log.i(TAG, "Location: ${location.latitude} ${location.longitude}")
 
-            //this@LocationUpdateService.location = locationResult.lastLocation
-                //"""Location: ${location.latitude} ${location.longitude}\n"""
+            locationResult.lastLocation?.let { sendLocationBroadcast(it) }
+        }
+    }
+
+    private fun sendLocationBroadcast(it: Location) {
+        val intent = Intent(LOCATION_UPDATE_ACTION)
+        intent.putExtra(LOCATION_LATITUDE, it.latitude)
+        intent.putExtra(LOCATION_LONGITUDE, it.longitude)
+        sendBroadcast(intent)
+    }
+
+    inner class LocalBinder : Binder() {
+        internal val service: LocationUpdateService
+            get() = this@LocationUpdateService
+
+        fun getService(): LocationUpdateService {
+            return this@LocationUpdateService
         }
     }
 
