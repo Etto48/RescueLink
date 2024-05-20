@@ -1,8 +1,10 @@
 package it.unipi.rescuelink
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -11,6 +13,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import it.unipi.location.LocationActivity
@@ -30,13 +33,23 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
         val button = findViewById<Button>(R.id.button)
         button.setOnClickListener {v -> this.changeToLocationView(v)}
 
-        //val serviceIntent = Intent(this, LocationUpdateService::class.java)
-        //bindService(serviceIntent, connection, BIND_AUTO_CREATE)
-        //startService(serviceIntent)
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val serviceIntent = Intent(this, LocationUpdateService::class.java)
+            bindService(serviceIntent, connection, BIND_AUTO_CREATE)
+            startService(serviceIntent)
+        }
+        else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
+            Log.d(TAG, "Permission not granted")
+        }
+
+
         val pos_tag = findViewById<TextView>(R.id.position)
         pos_tag.text = "0"
 
@@ -85,6 +98,10 @@ class MainActivity : AppCompatActivity() {
         //Log.d("LocationService", "Location: $location")
         //locationService.location
         //pos_tag.text = locationService.get_location().toString()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 
 }
