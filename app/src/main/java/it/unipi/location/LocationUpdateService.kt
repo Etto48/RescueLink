@@ -1,24 +1,30 @@
 package it.unipi.location
 
+import android.Manifest
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Binder
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.Task
 
 class LocationUpdateService : Service() {
     private val binder = LocalBinder()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var myRequest: LocationRequest
+    private lateinit var locationRequest: LocationRequest
 
     var loc : Location? = null
 
@@ -50,16 +56,35 @@ class LocationUpdateService : Service() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         Log.i(TAG, "Service created")
-        myRequest = LocationRequest.Builder(LOCATION_INTERVAL)
-            .setDurationMillis(Long.MAX_VALUE)
+        locationRequest = LocationRequest.Builder(LOCATION_INTERVAL)
             .setIntervalMillis(LOCATION_INTERVAL)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
+
+        checkRequest()
         Log.i(TAG, "Request created")
     }
 
+    fun checkRequest(){
+        Log.i(TAG, "Checking request")
+        val locationSettingsRequest = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+            .build()
+
+        val settingClient = LocationServices.getSettingsClient(this)
+        settingClient.checkLocationSettings(locationSettingsRequest).addOnCompleteListener(
+            fun(task: Task<LocationSettingsResponse>) {
+                if (task.isSuccessful) {
+                    Log.d(TAG, "Request Check Passed")
+                } else {
+                    Log.d(TAG, "Request Check Failed")
+                }
+            }
+        )
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        //return super.onStartCommand(intent, flags, startId)
+        super.onStartCommand(intent, flags, startId)
         startLocationUpdates()
         Log.i(TAG, "Service started")
         return START_STICKY
@@ -71,10 +96,10 @@ class LocationUpdateService : Service() {
         Log.i(TAG, "Service destroyed")
     }
 
-    fun startLocationUpdates(){
+    fun startLocationUpdates_old(){
         Log.i(TAG, "Starting location updates")
         try {
-            val t = fusedLocationClient.requestLocationUpdates(myRequest, callback, Looper.getMainLooper())
+            val t = fusedLocationClient.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper())
             t.addOnSuccessListener { Log.d("LocationService", "Location updates started") }
             t.addOnFailureListener { Log.d("LocationService", "Location updates Failed") }
         }
@@ -84,7 +109,24 @@ class LocationUpdateService : Service() {
         }
     }
 
-    fun stopLocationUpdates(){
+    private fun startLocationUpdates(){
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing location permission")
+            stopSelf()
+            return
+        }
+
+        val task = fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            callback,
+            Looper.getMainLooper()
+        )
+        task.addOnSuccessListener { Log.d(TAG, "Successful registration") }
+        task.addOnFailureListener { Log.d(TAG, "Failure in registration: " + it.message) }
+    }
+
+    private fun stopLocationUpdates(){
         Log.i(TAG, "Stopping location updates")
         fusedLocationClient.removeLocationUpdates(callback)
     }
@@ -101,6 +143,7 @@ class LocationUpdateService : Service() {
     }
 
     private fun sendLocationBroadcast(it: Location) {
+        Log.i(TAG, "Sending location broadcast")
         val intent = Intent(LOCATION_UPDATE_ACTION)
         intent.putExtra(LOCATION_LATITUDE, it.latitude)
         intent.putExtra(LOCATION_LONGITUDE, it.longitude)

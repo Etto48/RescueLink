@@ -60,6 +60,12 @@
                 <action android:name="android.intent.action.SCREEN_OFF" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name="it.unipi.location.LocationReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="it.unipi.location.LOCATION_UPDATE" />
+            </intent-filter>
+        </receiver>
         
     </application>
 </manifest>
