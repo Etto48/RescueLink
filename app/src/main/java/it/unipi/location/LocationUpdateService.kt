@@ -2,6 +2,7 @@ package it.unipi.location
 
 import android.Manifest
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -100,8 +101,8 @@ class LocationUpdateService : Service() {
         Log.i(TAG, "Starting location updates")
         try {
             val t = fusedLocationClient.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper())
-            t.addOnSuccessListener { Log.d("LocationService", "Location updates started") }
-            t.addOnFailureListener { Log.d("LocationService", "Location updates Failed") }
+            t.addOnSuccessListener { Log.d(TAG, "Location updates started") }
+            t.addOnFailureListener { Log.d(TAG, "Location updates Failed") }
         }
         catch (e: SecurityException){
             Log.e(TAG, "Security Exception")
@@ -134,7 +135,7 @@ class LocationUpdateService : Service() {
     private val callback = object: LocationCallback(){
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
-            Log.i("LocationService", "Location received")
+            Log.i(TAG, "Location received")
             for (location in locationResult.locations)
                 Log.i(TAG, "Location: ${location.latitude} ${location.longitude}")
 
@@ -142,12 +143,15 @@ class LocationUpdateService : Service() {
         }
     }
 
-    private fun sendLocationBroadcast(it: Location) {
+    private fun sendLocationBroadcast(location: Location) {
         Log.i(TAG, "Sending location broadcast")
-        val intent = Intent(LOCATION_UPDATE_ACTION)
-        intent.putExtra(LOCATION_LATITUDE, it.latitude)
-        intent.putExtra(LOCATION_LONGITUDE, it.longitude)
-        sendBroadcast(intent)
+        val context : Context = this
+        Intent(context, LocationReceiver::class.java).also { intent ->
+            intent.setAction(LOCATION_UPDATE_ACTION)
+            intent.putExtra(LOCATION_LATITUDE, location.latitude)
+            intent.putExtra(LOCATION_LONGITUDE, location.longitude)
+            sendBroadcast(intent)
+        }
     }
 
     inner class LocalBinder : Binder() {
@@ -171,7 +175,7 @@ class LocationUpdateService : Service() {
         private const val LOCATION_MAX_AGE = 1000L
         private const val LOCATION_LATITUDE = "latitude"
         private const val LOCATION_LONGITUDE = "longitude"
-        private const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
+        const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
 
 
     }

@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 
-class LocationReceiver : BroadcastReceiver(){
+class LocationReceiver() : BroadcastReceiver() {
+    init {
+        Log.d(TAG, "LocationReceiver()")
+    }
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == LocationActivity.LOCATION_UPDATE_ACTION) {
             val latitude = intent.getDoubleExtra(LocationActivity.EXTRA_LATITUDE, 0.0)
@@ -15,7 +18,6 @@ class LocationReceiver : BroadcastReceiver(){
     }
 
     companion object {
-        private const val TAG = "MyLocationActivity"
-
+        private const val TAG = "LocationReceiver"
     }
 }
