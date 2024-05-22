@@ -178,8 +178,8 @@ class LocationUpdateService : Service() {
         private const val LOCATION_INTERVAL = 5000L
         private const val LOCATION_FASTEST_INTERVAL = 5000L
         private const val LOCATION_MAX_AGE = 1000L
-        private const val LOCATION_LATITUDE = "latitude"
-        private const val LOCATION_LONGITUDE = "longitude"
+        const val LOCATION_LATITUDE = "latitude"
+        const val LOCATION_LONGITUDE = "longitude"
         const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
 
 
