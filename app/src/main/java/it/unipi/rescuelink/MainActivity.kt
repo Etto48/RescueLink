@@ -83,12 +83,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, MapsActivity::class.java))
     }
 
-    private fun changeToLocationView(v: View?){
-        Log.d(null, "Changing to location view")
-        startActivity(Intent(this, LocationActivity::class.java))
-    }
-
-
     companion object {
         private const val TAG = "MainActivity"
     }
