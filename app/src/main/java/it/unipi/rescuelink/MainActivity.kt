@@ -3,7 +3,6 @@ package it.unipi.rescuelink
 import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -12,13 +11,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import it.unipi.location.LocationActivity
 import it.unipi.location.LocationReceiver
 import it.unipi.location.LocationUpdateService
 
@@ -30,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -39,8 +35,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener {v -> this.changeToLocationView(v)}
+        button.setOnClickListener {v -> this.changeToMapsView(v)}
 
+        val pos_tag = findViewById<TextView>(R.id.position)
+        pos_tag.text = "0"
+
+        // Start the location service
+        // Refine this part
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
@@ -53,15 +54,6 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
             Log.d(TAG, "Permission not granted")
         }
-
-
-        val pos_tag = findViewById<TextView>(R.id.position)
-        pos_tag.text = "0"
-
-        locationReceiver = LocationReceiver()
-        val intentFilter = IntentFilter(LocationUpdateService.LOCATION_UPDATE_ACTION)
-
-        ContextCompat.registerReceiver(this, locationReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onStop() {
@@ -96,15 +88,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, LocationActivity::class.java))
     }
 
-    private fun testService(v: View?){
-        val pos_tag = findViewById<TextView>(R.id.position)
-        //locationService.getCurrentLocation()
-        //val location = locationService.get_location()
-
-        //Log.d("LocationService", "Location: $location")
-        //locationService.location
-        //pos_tag.text = locationService.get_location().toString()
-    }
 
     companion object {
         private const val TAG = "MainActivity"

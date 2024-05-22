@@ -2,7 +2,6 @@ package it.unipi.location
 
 import android.Manifest
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -145,9 +144,15 @@ class LocationUpdateService : Service() {
 
     private fun sendLocationBroadcast(location: Location) {
         Log.i(TAG, "Sending location broadcast")
-        val context : Context = this
-        Intent(context, LocationReceiver::class.java).also { intent ->
-            intent.setAction(LOCATION_UPDATE_ACTION)
+        // This broadcast worked on the static receiver
+        //val context : Context = this
+        //Intent(context, LocationReceiver::class.java).also { intent ->
+        //            intent.setAction(LOCATION_UPDATE_ACTION)
+        //            intent.putExtra(LOCATION_LATITUDE, location.latitude)
+        //            intent.putExtra(LOCATION_LONGITUDE, location.longitude)
+        //            sendBroadcast(intent)
+        //        }
+        Intent(LOCATION_UPDATE_ACTION).also { intent ->
             intent.putExtra(LOCATION_LATITUDE, location.latitude)
             intent.putExtra(LOCATION_LONGITUDE, location.longitude)
             sendBroadcast(intent)
@@ -170,7 +175,7 @@ class LocationUpdateService : Service() {
     companion object {
         private const val TAG = "LocationService"
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
-        private const val LOCATION_INTERVAL = 1000L
+        private const val LOCATION_INTERVAL = 5000L
         private const val LOCATION_FASTEST_INTERVAL = 5000L
         private const val LOCATION_MAX_AGE = 1000L
         private const val LOCATION_LATITUDE = "latitude"

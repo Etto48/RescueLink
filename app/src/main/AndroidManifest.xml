@@ -66,6 +66,8 @@
                 <action android:name="it.unipi.location.LOCATION_UPDATE" />
             </intent-filter>
         </receiver>
-        
+        <!--
+        -->
+
     </application>
 </manifest>
