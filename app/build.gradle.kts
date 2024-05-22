@@ -40,6 +40,18 @@ android {
 }
 
 dependencies {
+    val core_version = "1.13.1"
+
+    // Java language implementation
+    implementation("androidx.core:core:$core_version")
+    // Kotlin
+    implementation("androidx.core:core-ktx:$core_version")
+    // To use RoleManagerCompat
+    implementation("androidx.core:core-role:1.0.0")
+    // To use the Animator APIs
+    implementation("androidx.core:core-animation:1.0.0")
+    // To test the Animator APIs
+    androidTestImplementation("androidx.core:core-animation-testing:1.0.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
