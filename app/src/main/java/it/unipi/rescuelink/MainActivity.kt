@@ -20,6 +20,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.time.Duration
 
 class MainActivity : AppCompatActivity() {
@@ -50,76 +52,53 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPermissions(v: View?)
     {
+        var permissionSet = arrayOf<String>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionSet = arrayOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_ADVERTISE
+            )
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        {
+            permissionSet = arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
+        else
+        {
+            permissionSet = arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
 
+        permissionSet.forEach { permission ->
             if (ContextCompat.checkSelfPermission(
                     this,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_SCAN
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_ADVERTISE
+                    permission
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,
-                    arrayOf(
-                        Manifest.permission.BLUETOOTH_CONNECT,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.BLUETOOTH_SCAN,
-                        Manifest.permission.BLUETOOTH_ADVERTISE
-                    ), 2
+                    arrayOf(permission), 1
                 )
-                Toast.makeText(this, "Permissions granted", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, "Permissions already granted", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Permissions $permission granted", Toast.LENGTH_LONG)
+                    .show()
             }
-        }
-        else
-        {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_ADMIN
-                ) != PackageManager.PERMISSION_GRANTED
-            )
-            {
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(
-                        Manifest.permission.BLUETOOTH,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.BLUETOOTH_ADMIN
-                    ), 2)
-                Toast.makeText(this, "Permissions granted (old)", Toast.LENGTH_LONG).show()
-            }
-            else
-            {
-                Toast.makeText(this, "Permissions already granted (old)", Toast.LENGTH_LONG).show()
+            else {
+                Toast.makeText(this, "Permission $permission already granted", Toast.LENGTH_LONG)
+                    .show()
             }
         }
     }
