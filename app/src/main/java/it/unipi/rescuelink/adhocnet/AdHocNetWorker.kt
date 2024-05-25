@@ -30,7 +30,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         BluetoothGattCharacteristic.PERMISSION_READ
     )
     private val infoService = BluetoothGattService(
-        UUID.fromString("9578d7f6-3fe4-404c-b2cc-841747b6163f"),
+        UUID.fromString("2c376359-addd-4cdf-acec-4fefe531a59d"),
         BluetoothGattService.SERVICE_TYPE_PRIMARY
     )
 
