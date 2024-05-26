@@ -1,6 +1,8 @@
 package it.unipi.rescuelink
 
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +10,10 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.location.LocationReceiver
 import it.unipi.location.LocationUpdateService
@@ -21,6 +26,21 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     private lateinit var binding: ActivityMapsBinding
     private lateinit var locationReceiver: LocationReceiver
 
+    private var possibleVictims = mutableMapOf<String, Marker?>()
+
+    private var myLocationMarker: Marker? = null
+
+    private val victimIcon: BitmapDescriptor by lazy{
+        val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.pv_indicator)
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetSize, targetSize, true)
+        BitmapDescriptorFactory.fromBitmap(scaledBitmap)
+    }
+
+    private val sarIcon: BitmapDescriptor by lazy{
+        val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.sar_indicator)
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetSize, targetSize, true)
+        BitmapDescriptorFactory.fromBitmap(scaledBitmap)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,8 +57,6 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        Log.d(TAG, "Starting location update")
 
     }
 
@@ -58,26 +76,43 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
 
-        // Add a marker in Sydney and move the camera
-        //val sydney = LatLng(-34.0, 151.0)
-        //mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val victim = PossibleVictim("aa","Paolo Palumbo", LatLng(40.7128, -74.0060), 25, 80, 1000)
+        updatePossibleVictim(victim)
     }
 
-    private fun updateMap(latLng: LatLng) {
-        Log.d(TAG, "Received location update: $latLng")
-        mMap.clear()
-        mMap.addMarker(MarkerOptions().position(latLng).title("Current Location"))
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+    private fun updatePossibleVictim(victim: PossibleVictim){
+        var marker = possibleVictims[victim.id]
+        if(marker == null){
+            val markerOpt = MarkerOptions().position(victim.position).icon(victimIcon)
+            marker = mMap.addMarker(markerOpt)
+            marker?.tag = victim
+            possibleVictims[victim.id] = marker
+        }
+        else{
+            marker.position = victim.position
+        }
     }
 
+    private fun updateMyLocation(latLng: LatLng) {
+        Log.d(TAG, "updateMyLocation: $latLng")
+        if (myLocationMarker == null) {
+            val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(sarIcon)
+            myLocationMarker = mMap.addMarker(markerOpt)
+            myLocationMarker?.snippet = "SAROperator"
+        }
+        else {
+            myLocationMarker!!.position = latLng
+        }
+    }
 
     companion object {
         private const val TAG = "MapsActivity"
+        private const val targetSize = 100
     }
 
     override fun onLocationReceived(location: LatLng) {
-        updateMap(location)
+        updateMyLocation(location)
     }
 }
