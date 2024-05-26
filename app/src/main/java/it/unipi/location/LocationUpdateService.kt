@@ -21,7 +21,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 
-class LocationUpdateService : Service() {
+class LocationUpdateService(var locationInterval: Long = LOCATION_INTERVAL) : Service() {
     private val binder = LocalBinder()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
@@ -56,8 +56,8 @@ class LocationUpdateService : Service() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         Log.i(TAG, "Service created")
-        locationRequest = LocationRequest.Builder(LOCATION_INTERVAL)
-            .setIntervalMillis(LOCATION_INTERVAL)
+        locationRequest = LocationRequest.Builder(locationInterval)
+            .setIntervalMillis(locationInterval)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
 
@@ -174,14 +174,9 @@ class LocationUpdateService : Service() {
 
     companion object {
         private const val TAG = "LocationService"
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
         private const val LOCATION_INTERVAL = 5000L
-        private const val LOCATION_FASTEST_INTERVAL = 5000L
-        private const val LOCATION_MAX_AGE = 1000L
         const val LOCATION_LATITUDE = "latitude"
         const val LOCATION_LONGITUDE = "longitude"
         const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
-
-
     }
 }
