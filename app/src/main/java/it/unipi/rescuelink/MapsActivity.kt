@@ -87,6 +87,7 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
         if(marker == null){
             val markerOpt = MarkerOptions().position(victim.position).icon(victimIcon)
             marker = mMap.addMarker(markerOpt)
+            marker?.snippet = POSSIBLE_VICTIM
             marker?.tag = victim
             possibleVictims[victim.id] = marker
         }
@@ -100,7 +101,7 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
         if (myLocationMarker == null) {
             val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(sarIcon)
             myLocationMarker = mMap.addMarker(markerOpt)
-            myLocationMarker?.snippet = "SAROperator"
+            myLocationMarker?.snippet = SAR_OPERATOR
         }
         else {
             myLocationMarker!!.position = latLng
@@ -110,6 +111,8 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     companion object {
         private const val TAG = "MapsActivity"
         private const val targetSize = 100
+        const val POSSIBLE_VICTIM = "possible_victim"
+        const val SAR_OPERATOR = "sar_operator"
     }
 
     override fun onLocationReceived(location: LatLng) {
