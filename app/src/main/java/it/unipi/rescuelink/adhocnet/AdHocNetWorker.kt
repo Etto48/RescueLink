@@ -18,7 +18,6 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -111,6 +110,11 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             Log.e("AdHocNet", "Write characteristic not implemented")
         }
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        private fun onReadSuccess(gatt: BluetoothGatt, value: ByteArray) {
+            Log.d("AdHocNet", "Data received from \"${gatt.device?.name}\": ${String(value)}")
+        }
+
         @Deprecated("This method is only called on API < 33", ReplaceWith(
             "super.onCharacteristicRead(gatt, characteristic, status)",
             "android.bluetooth.BluetoothGattCallback"))
@@ -122,12 +126,13 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
-            if (characteristic != null && characteristic.uuid == infoCharacteristic.uuid && status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("AdHocNet", "Data received from \"${gatt?.device?.name}\": ${String(characteristic.value)}")
+            if (gatt != null && characteristic != null && characteristic.uuid == infoCharacteristic.uuid && status == BluetoothGatt.GATT_SUCCESS) {
+                onReadSuccess(gatt, characteristic.value)
             }
         }
 
         // THIS FUCKER IS ONLY CALLED ON API >= 33
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onCharacteristicRead(
             gatt: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic,
@@ -136,11 +141,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         ) {
             super.onCharacteristicRead(gatt, characteristic, value, status)
             if (characteristic.uuid == infoCharacteristic.uuid && status == BluetoothGatt.GATT_SUCCESS) {
-                // TODO: handle the read value
-                Toast.makeText(context, "Read value: ${String(value)}", Toast.LENGTH_LONG).show()
-                Log.d("AdHocNet", "Read value: ${String(value)}")
-            } else {
-                Log.e("AdHocNet", "Failed to read characteristic")
+                onReadSuccess(gatt, value)
             }
         }
     }
