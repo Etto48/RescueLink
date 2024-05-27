@@ -115,6 +115,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             "super.onCharacteristicRead(gatt, characteristic, status)",
             "android.bluetooth.BluetoothGattCallback"))
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        @Suppress("DEPRECATION")
         override fun onCharacteristicRead(
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?,
