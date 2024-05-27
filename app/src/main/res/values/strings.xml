@@ -2,5 +2,4 @@
     <string name="app_name">RescueLink</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="ad_hoc_network">AdHocNetwork</string>
-    <string name="request_permissions">Permissions</string>
 </resources>
