@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.gms.maps.model.LatLng
+import trilateration.ECEF
 import trilateration.Trilateration
 
 class MainActivity : AppCompatActivity() {
@@ -40,9 +41,17 @@ class MainActivity : AppCompatActivity() {
         )
         val distances = listOf(100.0, 200.0, 110.0)
 
-        val trilateration = Trilateration(points, distances)
-        val location = trilateration.locate()
-        Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
+        val p = points[0]
+        Log.d(TAG, "Points: $p")
+        val transform = ECEF.latLngToECEF(p)
+        Log.d(TAG, "Origin: $transform")
+        val anti = ECEF.ecefToLatLng(transform)
+        Log.d(TAG, "Anti: $anti")
+
+        val t2 = Trilateration(points, distances)
+        val location2 = t2.locate()
+        Log.d(TAG, "Location2: ${location2.latitude}, ${location2.longitude}")
+
     }
 
     companion object {
