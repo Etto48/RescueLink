@@ -1,4 +1,4 @@
-package trilateration
+package it.unipi.trilateration
 
 import com.google.android.gms.maps.model.LatLng
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver

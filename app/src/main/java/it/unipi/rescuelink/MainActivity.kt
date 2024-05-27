@@ -10,8 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.gms.maps.model.LatLng
-import trilateration.ECEF
-import trilateration.Trilateration
+import it.unipi.trilateration.ECEF
+import it.unipi.trilateration.Trilateration
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
