@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -17,12 +16,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import java.time.Duration
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,25 +30,24 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val button_mapsactivity = findViewById<Button>(R.id.button_mapsactivity)
-        button_mapsactivity.setOnClickListener {v -> this.changeToMapsView(v)}
+        val buttonMapsActivity = findViewById<Button>(R.id.button_mapsactivity)
+        buttonMapsActivity.setOnClickListener {this.changeToMapsView()}
 
-        val button_adhocnetwork = findViewById<Button>(R.id.button_adhocnetwork)
-        button_adhocnetwork.setOnClickListener {v -> this.startAdHocNetwork(v)}
+        val buttonAdHocNetwork = findViewById<Button>(R.id.button_adhocnetwork)
+        buttonAdHocNetwork.setOnClickListener {this.startAdHocNetwork()}
 
-        val button_permissions = findViewById<Button>(R.id.button_permissions)
-        button_permissions.setOnClickListener {v -> this.getPermissions(v)}
+        getPermissions()
     }
 
-    private fun changeToMapsView(v: View?)
+    private fun changeToMapsView()
     {
         Log.d(null, "Changing to map view")
         startActivity(Intent(this, MapsActivity::class.java))
     }
 
-    private fun getPermissions(v: View?)
+    private fun getPermissions()
     {
-        var permissionSet = arrayOf<String>()
+        val permissionSet: Array<String>
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionSet = arrayOf(
                 Manifest.permission.BLUETOOTH_CONNECT,
@@ -93,17 +88,11 @@ class MainActivity : AppCompatActivity() {
                     this,
                     arrayOf(permission), 1
                 )
-                Toast.makeText(this, "Permissions $permission granted", Toast.LENGTH_LONG)
-                    .show()
-            }
-            else {
-                Toast.makeText(this, "Permission $permission already granted", Toast.LENGTH_LONG)
-                    .show()
             }
         }
     }
 
-    private fun startAdHocNetwork(v: View?)
+    private fun startAdHocNetwork()
     {
         val bluetoothManager : BluetoothManager = applicationContext.getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter : BluetoothAdapter? = bluetoothManager.adapter
@@ -123,11 +112,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Log.d("AdHocNet", "Starting ad-hoc network")
-            val workRequest = PeriodicWorkRequestBuilder<it.unipi.rescuelink.adhocnet.AdHocNetWorker>(
-                Duration.ofSeconds(900)).build()
+            val workRequest = OneTimeWorkRequestBuilder<it.unipi.rescuelink.adhocnet.AdHocNetWorker>().build()
             WorkManager
                 .getInstance(applicationContext)
-                .enqueueUniquePeriodicWork("AdHocNetwork", ExistingPeriodicWorkPolicy.KEEP, workRequest)
+                .enqueueUniqueWork("AdHocNet", ExistingWorkPolicy.REPLACE, workRequest)
         }
     }
 }
