@@ -116,7 +116,9 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         private fun onReadSuccess(gatt: BluetoothGatt, value: ByteArray) {
             try {
                 val info = RescueLink.Info.fromJSON(String(value))
-                RescueLink.info.merge(gatt, info)
+                // TODO: check if gatt.device.address is consistent,
+                //  previously, it gave some errors during testing
+                RescueLink.info.merge(gatt.device.address, info)
                 Log.d("AdHocNet", "Data received from \"${gatt.device?.name}\": ${String(value)}")
             } catch (e: JsonSyntaxException)
             {
@@ -163,6 +165,17 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             if (result != null) {
                 if (!connectedGattSet.containsKey(result.device.address)) {
                     result.device.connectGatt(context, false, gattCallback)
+                    if (RescueLink.info.thisDeviceInfo.exactPosition != null) {
+                        val distance = DistanceInfo.estimateDistance(result.rssi, result.txPower)
+                        val distanceInfo = DistanceInfo(distance, RescueLink.info.thisDeviceInfo.exactPosition!!)
+                        if (RescueLink.info.nearbyDevicesInfo[result.device.address] == null) {
+                            val newInfo = DeviceInfo()
+                            newInfo.addDistanceInfo(distanceInfo)
+                            RescueLink.info.nearbyDevicesInfo[result.device.address] = newInfo
+                        } else {
+                            RescueLink.info.nearbyDevicesInfo[result.device.address]!!.addDistanceInfo(distanceInfo)
+                        }
+                    }
                 }
             }
         }
