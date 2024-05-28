@@ -10,21 +10,37 @@ class DeviceInfo(
 ) {
     private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
 
+    companion object {
+        const val MAX_KNOWN_DISTANCES = 5
+    }
+
     var exactPosition: LatLng? = exactPosition
         set(value) {
             field = value
-            timestamp = OffsetDateTime.now().toEpochSecond()
+            updateTimestamp()
         }
 
     var personalInfo: PersonalInfo? = personalInfo
         set(value) {
             field = value
-            timestamp = OffsetDateTime.now().toEpochSecond()
+            updateTimestamp()
         }
 
-    fun merge(other: DeviceInfo): DeviceInfo {
-        val maxKnownDistances = 5
+    fun addDistanceInfo(distanceInfo: DistanceInfo) {
+        if (knownDistances == null)
+        {
+            knownDistances = mutableListOf()
+        }
+        knownDistances!!.add(distanceInfo)
+        knownDistances?.sortByDescending { it.timestamp }
+        knownDistances = knownDistances?.take(MAX_KNOWN_DISTANCES)?.toMutableList()
+    }
 
+    private fun updateTimestamp() {
+        timestamp = OffsetDateTime.now().toEpochSecond()
+    }
+
+    fun merge(other: DeviceInfo): DeviceInfo {
         val ret = DeviceInfo()
         // get the most recent exact position and personal info
         if (timestamp > other.timestamp)
@@ -45,7 +61,7 @@ class DeviceInfo(
         {
             val fullList = knownDistances.orEmpty().union(other.knownDistances.orEmpty()).toMutableList()
             fullList.sortByDescending { it.timestamp }
-            ret.knownDistances = fullList.take(maxKnownDistances).toMutableList()
+            ret.knownDistances = fullList.take(MAX_KNOWN_DISTANCES).toMutableList()
         }
 
         return ret
