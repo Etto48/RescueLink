@@ -1,8 +1,8 @@
-package it.unipi.rescuelink
+package it.unipi.rescuelink.maps
 
 import com.google.android.gms.maps.model.LatLng
 
-data class PossibleVictim(
+data class PossibleVictimTag(
     val id: String,
     val name: String?,
     val position: LatLng,

@@ -1,4 +1,4 @@
-package it.unipi.rescuelink
+package it.unipi.rescuelink.maps
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
 import it.unipi.rescuelink.MapsActivity.Companion.SAR_OPERATOR
+import it.unipi.rescuelink.R
 
 class SarInfoWindowAdapter(
     private val context: Context
@@ -26,7 +27,7 @@ class SarInfoWindowAdapter(
         }
         else {
             // 1. Get tag
-            val victim = p0.tag as PossibleVictim
+            val victim = p0.tag as PossibleVictimTag
 
             if(victim.name == null){
                 val view = LayoutInflater.from(context).inflate(

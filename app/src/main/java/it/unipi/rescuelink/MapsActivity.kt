@@ -1,8 +1,6 @@
 package it.unipi.rescuelink
 
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -10,15 +8,17 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.location.LocationReceiver
 import it.unipi.location.LocationUpdateService
 import it.unipi.location.onLocationReceivedCallback
+import it.unipi.rescuelink.adhocnet.Position
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
+import it.unipi.rescuelink.maps.IconProvider
+import it.unipi.rescuelink.maps.PossibleVictimTag
+import it.unipi.rescuelink.maps.SarInfoWindowAdapter
 
 class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReadyCallback {
 
@@ -26,21 +26,11 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     private lateinit var binding: ActivityMapsBinding
     private lateinit var locationReceiver: LocationReceiver
 
-    private var possibleVictims = mutableMapOf<String, Marker?>()
-
+    private var possibleVictimMarkers = mutableMapOf<String, Marker?>()
     private var myLocationMarker: Marker? = null
 
-    private val victimIcon: BitmapDescriptor by lazy{
-        val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.pv_indicator)
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetSize, targetSize, true)
-        BitmapDescriptorFactory.fromBitmap(scaledBitmap)
-    }
 
-    private val sarIcon: BitmapDescriptor by lazy{
-        val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.sar_indicator)
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetSize, targetSize, true)
-        BitmapDescriptorFactory.fromBitmap(scaledBitmap)
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -78,18 +68,18 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
         mMap = googleMap
         mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
 
-        val victim = PossibleVictim("aa","Paolo Palumbo", LatLng(40.7128, -74.0060), 25, 80, 1000)
+        val victim = PossibleVictimTag("aa","Paolo Palumbo", LatLng(40.7128, -74.0060), 25, 80, 1000)
         updatePossibleVictim(victim)
     }
 
-    private fun updatePossibleVictim(victim: PossibleVictim){
-        var marker = possibleVictims[victim.id]
+    private fun updatePossibleVictim(victim: PossibleVictimTag){
+        var marker = possibleVictimMarkers[victim.id]
         if(marker == null){
-            val markerOpt = MarkerOptions().position(victim.position).icon(victimIcon)
+            val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100))
             marker = mMap.addMarker(markerOpt)
             marker?.snippet = POSSIBLE_VICTIM
             marker?.tag = victim
-            possibleVictims[victim.id] = marker
+            possibleVictimMarkers[victim.id] = marker
         }
         else{
             marker.position = victim.position
@@ -99,7 +89,7 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     private fun updateMyLocation(latLng: LatLng) {
         Log.d(TAG, "updateMyLocation: $latLng")
         if (myLocationMarker == null) {
-            val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(sarIcon)
+            val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100))
             myLocationMarker = mMap.addMarker(markerOpt)
             myLocationMarker?.snippet = SAR_OPERATOR
         }
@@ -110,12 +100,12 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
 
     companion object {
         private const val TAG = "MapsActivity"
-        private const val targetSize = 100
         const val POSSIBLE_VICTIM = "possible_victim"
         const val SAR_OPERATOR = "sar_operator"
     }
 
     override fun onLocationReceived(location: LatLng) {
+        RescueLink.thisDeviceInfo.exactPosition = Position(location.latitude, location.longitude)
         updateMyLocation(location)
     }
 }
