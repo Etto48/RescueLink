@@ -21,6 +21,8 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.google.gson.JsonSyntaxException
+import it.unipi.rescuelink.RescueLink
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
@@ -53,14 +55,14 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             characteristic: BluetoothGattCharacteristic?
         ) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
+            val infoJSON = RescueLink.info.toJSON()
             if (device != null && characteristic != null && characteristic.uuid == infoCharacteristic.uuid) {
                 if (bluetoothGattServer?.sendResponse(
                     device,
                     requestId,
                     BluetoothGatt.GATT_SUCCESS,
                     offset,
-                    // TODO: You should send the actual data here in json
-                    "[]".toByteArray()) != true
+                    infoJSON.toByteArray()) != true
                 ) {
                     Log.e("AdHocNet", "Failed to respond to read request")
                 }
@@ -112,7 +114,14 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
 
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         private fun onReadSuccess(gatt: BluetoothGatt, value: ByteArray) {
-            Log.d("AdHocNet", "Data received from \"${gatt.device?.name}\": ${String(value)}")
+            try {
+                val info = RescueLink.Info.fromJSON(String(value))
+                RescueLink.info.merge(gatt, info)
+                Log.d("AdHocNet", "Data received from \"${gatt.device?.name}\": ${String(value)}")
+            } catch (e: JsonSyntaxException)
+            {
+                Log.e("AdHocNet", "Failed to parse received JSON: $e")
+            }
         }
 
         @Deprecated("This method is only called on API < 33", ReplaceWith(
