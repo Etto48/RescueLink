@@ -4,23 +4,24 @@ import com.google.android.gms.maps.model.LatLng
 import java.time.OffsetDateTime
 
 class DeviceInfo(
-    var exactPosition: LatLng? = null,
-    var knownDistances: MutableList<DistanceInfo>? = null,
-    var personalInfo: PersonalInfo? = null
+    exactPosition: LatLng? = null,
+    personalInfo: PersonalInfo? = null,
+    var knownDistances: MutableList<DistanceInfo>? = null
 ) {
-    var timestamp: Long = OffsetDateTime.now().toEpochSecond()
+    private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
 
-    fun updateExactPosition(position: LatLng)
-    {
-        exactPosition = position
-        timestamp = OffsetDateTime.now().toEpochSecond()
-    }
+    var exactPosition: LatLng? = exactPosition
+        set(value) {
+            field = value
+            timestamp = OffsetDateTime.now().toEpochSecond()
+        }
 
-    fun updatePersonalInfo(info: PersonalInfo)
-    {
-        personalInfo = info
-        timestamp = OffsetDateTime.now().toEpochSecond()
-    }
+    var personalInfo: PersonalInfo? = personalInfo
+        set(value) {
+            field = value
+            timestamp = OffsetDateTime.now().toEpochSecond()
+        }
+
     fun merge(other: DeviceInfo): DeviceInfo {
         val maxKnownDistances = 5
 
