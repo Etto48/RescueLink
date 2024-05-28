@@ -96,6 +96,22 @@ class LocationUpdateService(var locationInterval: Long = LOCATION_INTERVAL) : Se
         Log.i(TAG, "Service destroyed")
     }
 
+<<<<<<< HEAD
+=======
+    fun startLocationUpdates_old(){
+        Log.i(TAG, "Starting location updates")
+        try {
+            val t = fusedLocationClient.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper())
+            t.addOnSuccessListener { Log.d(TAG, "Location updates started") }
+            t.addOnFailureListener { Log.d(TAG, "Location updates Failed") }
+        }
+        catch (e: SecurityException){
+            Log.e(TAG, "Security Exception")
+            e.printStackTrace()
+        }
+    }
+
+>>>>>>> origin/Location
     private fun startLocationUpdates(){
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -131,7 +147,18 @@ class LocationUpdateService(var locationInterval: Long = LOCATION_INTERVAL) : Se
 
     private fun sendLocationBroadcast(location: Location) {
         Log.i(TAG, "Sending location broadcast")
+<<<<<<< HEAD
 
+=======
+        // This broadcast worked on the static receiver
+        //val context : Context = this
+        //Intent(context, LocationReceiver::class.java).also { intent ->
+        //            intent.setAction(LOCATION_UPDATE_ACTION)
+        //            intent.putExtra(LOCATION_LATITUDE, location.latitude)
+        //            intent.putExtra(LOCATION_LONGITUDE, location.longitude)
+        //            sendBroadcast(intent)
+        //        }
+>>>>>>> origin/Location
         Intent(LOCATION_UPDATE_ACTION).also { intent ->
             intent.putExtra(LOCATION_LATITUDE, location.latitude)
             intent.putExtra(LOCATION_LONGITUDE, location.longitude)
