@@ -1,6 +1,7 @@
 package it.unipi.rescuelink
 
 import android.app.Application
+import android.bluetooth.BluetoothGatt
 import com.google.gson.Gson
 import it.unipi.rescuelink.adhocnet.DeviceInfo
 
@@ -20,6 +21,18 @@ class RescueLink : Application() {
                     thisDeviceInfo = this.thisDeviceInfo
                 )
             )
+        }
+
+        fun merge(gatt: BluetoothGatt, info: Info) {
+            for ((address, deviceInfo) in info.nearbyDevicesInfo) {
+                val currentDeviceInfo = nearbyDevicesInfo[address]
+                val newDeviceInfo: DeviceInfo
+                if (currentDeviceInfo == null) {
+                    newDeviceInfo = deviceInfo
+                } else {
+                    newDeviceInfo = deviceInfo.merge(currentDeviceInfo)
+                }
+            }
         }
         companion object {
 
