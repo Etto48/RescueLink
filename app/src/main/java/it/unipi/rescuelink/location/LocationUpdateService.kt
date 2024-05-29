@@ -18,39 +18,12 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 
 class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERVAL) : Service() {
     private val binder = LocalBinder()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-
-    private var loc : Location? = null
-
-    fun getLocation(): Location? {
-        try {
-            val locTask = fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                CancellationTokenSource().token,
-            )
-
-            locTask.addOnSuccessListener {
-                loc = it
-                it?.let {
-                    sendLocationBroadcast(it)
-                }
-                Log.i(TAG, " - Current Location: ${loc?.latitude} ${loc?.longitude}")
-            }
-
-            return loc
-        }
-        catch (e: SecurityException){
-            Log.e(TAG, "Security Exception")
-            e.printStackTrace()
-            return null
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()

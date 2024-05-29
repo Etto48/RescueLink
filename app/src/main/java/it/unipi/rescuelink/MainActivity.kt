@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -16,16 +15,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.gms.maps.model.LatLng
-import it.unipi.rescuelink.location.LocationReceiver
 import it.unipi.rescuelink.location.LocationUpdateService
-import it.unipi.rescuelink.trilateration.Trilateration
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var locationService: LocationUpdateService
     private var isBound = false
-    private lateinit var locationReceiver: LocationReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +33,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener {v -> this.testTrilateration(v)}
+        button.setOnClickListener {_ -> this.changeToMapsView() }
 
-        val pos_tag = findViewById<TextView>(R.id.position)
-        pos_tag.text = "0"
+        val posTag = findViewById<TextView>(R.id.position)
+        posTag.text = "0"
 
         // Start the location service
         // Refine this part
@@ -80,28 +75,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun changeToMapsView(v: View?)
+    private fun changeToMapsView()
     {
         Log.d(null, "Changing to map view")
         startActivity(Intent(this, MapsActivity::class.java))
     }
 
-    private fun testTrilateration(v: View?){
-        val points = listOf(
-            LatLng(43.8433, 10.5031),
-        )
-        val distances = listOf(100.0)
-
-        val t = Trilateration(points, distances)
-        try {
-            val location2 = t.locate()
-            Log.d(TAG, "Location2: ${location2.latitude}, ${location2.longitude}")
-        }
-        catch (e: Exception) {
-            Log.e(TAG, "Error locating location", e)
-        }
-
-    }
 
     companion object {
         private const val TAG = "MainActivity"
