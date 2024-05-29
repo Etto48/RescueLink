@@ -29,7 +29,7 @@ class SarInfoWindowAdapter(
             // 1. Get tag
             val victim = p0.tag as PossibleVictimTag
 
-            if(victim.name == null){
+            if(victim.simpleTag){
                 val view = LayoutInflater.from(context).inflate(
                     R.layout.simple_marker_info, null
                 )

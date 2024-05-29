@@ -14,7 +14,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.location.LocationReceiver
 import it.unipi.location.LocationUpdateService
 import it.unipi.location.onLocationReceivedCallback
-import it.unipi.rescuelink.adhocnet.Position
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
@@ -67,35 +66,32 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
+        addMyLocation(LatLng(0.0,0.0))
+    }
 
-        val victim = PossibleVictimTag("aa","Paolo Palumbo", LatLng(40.7128, -74.0060), 25, 80, 1000)
-        updatePossibleVictim(victim)
+    fun addPossibleVictim(victim: PossibleVictimTag){
+        val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100))
+        val marker = mMap.addMarker(markerOpt)
+        marker?.snippet = POSSIBLE_VICTIM
+        marker?.tag = victim
+        possibleVictimMarkers[victim.id] = marker
     }
 
     private fun updatePossibleVictim(victim: PossibleVictimTag){
-        var marker = possibleVictimMarkers[victim.id]
-        if(marker == null){
-            val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100))
-            marker = mMap.addMarker(markerOpt)
-            marker?.snippet = POSSIBLE_VICTIM
-            marker?.tag = victim
-            possibleVictimMarkers[victim.id] = marker
-        }
-        else{
-            marker.position = victim.position
-        }
+        val marker = possibleVictimMarkers[victim.id]
+        marker?.position = victim.position
+        marker?.tag = victim
+    }
+
+    private fun addMyLocation(latLng: LatLng){
+        val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100))
+        myLocationMarker = mMap.addMarker(markerOpt)
+        myLocationMarker?.snippet = SAR_OPERATOR
     }
 
     private fun updateMyLocation(latLng: LatLng) {
         Log.d(TAG, "updateMyLocation: $latLng")
-        if (myLocationMarker == null) {
-            val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100))
-            myLocationMarker = mMap.addMarker(markerOpt)
-            myLocationMarker?.snippet = SAR_OPERATOR
-        }
-        else {
-            myLocationMarker!!.position = latLng
-        }
+        myLocationMarker!!.position = latLng
     }
 
     companion object {
@@ -105,7 +101,56 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     }
 
     override fun onLocationReceived(location: LatLng) {
-        RescueLink.thisDeviceInfo.exactPosition = Position(location.latitude, location.longitude)
+        RescueLink.info.thisDeviceInfo.exactPosition = location
         updateMyLocation(location)
+        update()
+    }
+
+    private fun update(){
+        val nerbyDev = RescueLink.info.nearbyDevicesInfo
+
+        for(dev in nerbyDev){
+            val id = dev.key
+            val info = dev.value
+
+            var ranges = info.knownDistances?.map {
+                it.estimatedDistance
+            }
+            var positions = info.knownDistances?.map {
+                it.measurementPosition
+            }
+
+            // TRILATERIZZA LA NUOVA POSIZIONE
+            // ###############################
+            // ###############################
+            // ###############################
+            val newPosition = LatLng(0.0,0.0)
+            // ###############################
+            // ###############################
+            // ###############################
+            // ##### DEVO UNIRE LE BRANCH ####
+
+            var pv : PossibleVictimTag
+            if(info.personalInfo != null){
+                val name = info.personalInfo!!.completeName
+                val age = info.personalInfo!!.getAge()
+                val weight = info.personalInfo!!.weightKg
+                val hr = info.personalInfo!!.heartBPM
+
+                pv = PossibleVictimTag(id,name, newPosition, age, weight, hr)
+            }
+            else{
+                pv = PossibleVictimTag(id, newPosition)
+            }
+
+            val marker = possibleVictimMarkers[id]
+            if(marker == null){
+                addPossibleVictim(pv)
+            }
+            else {
+                updatePossibleVictim(pv)
+            }
+
+        }
     }
 }

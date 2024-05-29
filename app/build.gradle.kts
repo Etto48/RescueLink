@@ -53,6 +53,7 @@ dependencies {
     // To test the Animator APIs
     androidTestImplementation("androidx.core:core-animation-testing:1.0.0")
 
+    implementation(libs.gson)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

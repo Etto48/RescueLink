@@ -7,7 +7,10 @@ data class PossibleVictimTag(
     val name: String?,
     val position: LatLng,
     val age: Int?,
-    val weight: Int?,
-    val heartRate: Int?
-)
+    val weight: Double?,
+    val heartRate: Double?,
+    val simpleTag: Boolean = false
+){
+    constructor(id: String, position: LatLng) : this(id,null,position,null,null,null, true)
+}
 
