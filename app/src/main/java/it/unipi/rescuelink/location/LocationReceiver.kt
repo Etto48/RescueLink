@@ -1,4 +1,4 @@
-package it.unipi.location
+package it.unipi.rescuelink.location
 
 import android.content.BroadcastReceiver
 import android.content.Context

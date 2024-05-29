@@ -1,4 +1,4 @@
-package it.unipi.location
+package it.unipi.rescuelink.location
 
 import android.Manifest
 import android.app.Service

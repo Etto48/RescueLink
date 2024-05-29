@@ -16,8 +16,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import it.unipi.location.LocationReceiver
-import it.unipi.location.LocationUpdateService
+import com.google.android.gms.maps.model.LatLng
+import it.unipi.rescuelink.location.LocationReceiver
+import it.unipi.rescuelink.location.LocationUpdateService
+import it.unipi.rescuelink.trilateration.Trilateration
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener {v -> this.changeToMapsView(v)}
+        button.setOnClickListener {v -> this.testTrilateration(v)}
 
         val pos_tag = findViewById<TextView>(R.id.position)
         pos_tag.text = "0"
@@ -82,6 +84,23 @@ class MainActivity : AppCompatActivity() {
     {
         Log.d(null, "Changing to map view")
         startActivity(Intent(this, MapsActivity::class.java))
+    }
+
+    private fun testTrilateration(v: View?){
+        val points = listOf(
+            LatLng(43.8433, 10.5031),
+        )
+        val distances = listOf(100.0)
+
+        val t = Trilateration(points, distances)
+        try {
+            val location2 = t.locate()
+            Log.d(TAG, "Location2: ${location2.latitude}, ${location2.longitude}")
+        }
+        catch (e: Exception) {
+            Log.e(TAG, "Error locating location", e)
+        }
+
     }
 
     companion object {

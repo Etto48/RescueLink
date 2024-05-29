@@ -1,14 +1,16 @@
-package it.unipi.emergency
+package it.unipi.rescuelink.emergency
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 
-private const val TAG = "EmergencyReceiver"
-
 class EmergencyReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "evento ricevuto")
+    }
+
+    companion object {
+        private const val TAG = "EmergencyReceiver"
     }
 }

@@ -1,4 +1,4 @@
-package it.unipi.trilateration
+package it.unipi.rescuelink.trilateration
 
 import com.google.android.gms.maps.model.LatLng
 import kotlin.math.atan2

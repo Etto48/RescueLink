@@ -1,4 +1,4 @@
-package it.unipi.location
+package it.unipi.rescuelink.location
 
 import com.google.android.gms.maps.model.LatLng
 

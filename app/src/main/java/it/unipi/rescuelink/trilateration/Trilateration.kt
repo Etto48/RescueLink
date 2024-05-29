@@ -1,4 +1,4 @@
-package it.unipi.trilateration
+package it.unipi.rescuelink.trilateration
 
 import com.google.android.gms.maps.model.LatLng
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver
@@ -24,15 +24,22 @@ class Trilateration(points: List<LatLng>, ranges: List<Double>) {
             doubleArrayOf(coordinate.x, coordinate.y, coordinate.z)
         }.toTypedArray()
 
+        var centroid: DoubleArray
+        try {
+            val solver = NonLinearLeastSquaresSolver(
+                TrilaterationFunction(positions, distances),
+                LevenbergMarquardtOptimizer()
+            )
 
-        val solver = NonLinearLeastSquaresSolver(
-            TrilaterationFunction(positions, distances),
-            LevenbergMarquardtOptimizer()
-        )
-
-        val optimum = solver.solve()
-
-        val centroid = optimum.point.toArray()
+            val optimum = solver.solve()
+            centroid = optimum.point.toArray()
+        }
+        catch ( _: java.lang.IllegalArgumentException){
+            if (positions.size == 1){
+                centroid = doubleArrayOf(positions[0][0], positions[0][1], positions[0][2])
+            }
+            else throw java.lang.IllegalArgumentException("Need at least one positions")
+        }
         val centroidECEF = ECEFCoordinate(centroid[0], centroid[1], centroid[2])
         val centroidLatLng = ECEF.ecefToLatLng(centroidECEF)
         return centroidLatLng

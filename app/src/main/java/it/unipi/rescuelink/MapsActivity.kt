@@ -11,14 +11,14 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import it.unipi.location.LocationReceiver
-import it.unipi.location.LocationUpdateService
-import it.unipi.location.OnLocationReceivedCallback
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
+import it.unipi.rescuelink.location.LocationReceiver
+import it.unipi.rescuelink.location.LocationUpdateService
+import it.unipi.rescuelink.location.OnLocationReceivedCallback
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
 import it.unipi.rescuelink.maps.SarInfoWindowAdapter
-import it.unipi.trilateration.Trilateration
+import it.unipi.rescuelink.trilateration.Trilateration
 
 class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReadyCallback {
 
@@ -107,51 +107,41 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
         update()
     }
 
-    private fun update(){
+    private fun update() {
         val nearbyDev = RescueLink.info.nearbyDevicesInfo
 
-        for(dev in nearbyDev){
+        for (dev in nearbyDev) {
             val id = dev.key
             val info = dev.value
 
-            val ranges = info.knownDistances?.map {
-                it.estimatedDistance
-            }
-            val positions = info.knownDistances?.map {
-                it.measurementPosition
-            }
+            val ranges = info.knownDistances?.map { it.estimatedDistance }
+            val positions = info.knownDistances?.map { it.measurementPosition }
 
-            var newPosition : LatLng
-            if(!(ranges == null || positions == null)){
-                val solver = Trilateration(positions, ranges)
-                newPosition = solver.locate()
-            }
-            else {
+            // Ensure both ranges and positions are not null, have at least one element, and are of the same length
+            if (ranges.isNullOrEmpty() || positions.isNullOrEmpty() || ranges.size != positions.size) {
                 continue
             }
 
+            val solver = Trilateration(positions, ranges)
+            val newPosition = solver.locate()
 
-            var pv : PossibleVictimTag
-            if(info.personalInfo != null){
+            val pv = if (info.personalInfo != null) {
                 val name = info.personalInfo!!.completeName
                 val age = info.personalInfo!!.getAge()
                 val weight = info.personalInfo!!.weightKg
                 val hr = info.personalInfo!!.heartBPM
 
-                pv = PossibleVictimTag(id,name, newPosition, age, weight, hr)
-            }
-            else{
-                pv = PossibleVictimTag(id, newPosition)
+                PossibleVictimTag(id, name, newPosition, age, weight, hr)
+            } else {
+                PossibleVictimTag(id, newPosition)
             }
 
             val marker = possibleVictimMarkers[id]
-            if(marker == null){
+            if (marker == null) {
                 addPossibleVictim(pv)
-            }
-            else {
+            } else {
                 updatePossibleVictim(pv)
             }
-
         }
     }
 }

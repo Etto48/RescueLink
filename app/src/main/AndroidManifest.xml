@@ -30,7 +30,7 @@
              "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
         -->
         
-        <service android:name="it.unipi.location.LocationUpdateService" android:foregroundServiceType="location"/>
+        <service android:name=".location.LocationUpdateService" android:foregroundServiceType="location"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -54,14 +54,14 @@
         </activity>
 
 
-        <receiver android:name="it.unipi.emergency.EmergencyReceiver" android:exported="false">
+        <receiver android:name=".emergency.EmergencyReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="it.unipi.location.LocationReceiver" android:exported="false">
+        <receiver android:name=".location.LocationReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="it.unipi.location.LOCATION_UPDATE" />
             </intent-filter>
