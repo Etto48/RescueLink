@@ -3,7 +3,6 @@ package it.unipi.trilateration
 import com.google.android.gms.maps.model.LatLng
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver
 import com.lemmingapex.trilateration.TrilaterationFunction
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 
 
@@ -31,7 +30,7 @@ class Trilateration(points: List<LatLng>, ranges: List<Double>) {
             LevenbergMarquardtOptimizer()
         )
 
-        val optimum: Optimum = solver.solve()
+        val optimum = solver.solve()
 
         val centroid = optimum.point.toArray()
         val centroidECEF = ECEFCoordinate(centroid[0], centroid[1], centroid[2])

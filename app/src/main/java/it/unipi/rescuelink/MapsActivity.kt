@@ -18,6 +18,7 @@ import it.unipi.rescuelink.databinding.ActivityMapsBinding
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
 import it.unipi.rescuelink.maps.SarInfoWindowAdapter
+import it.unipi.trilateration.Trilateration
 
 class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReadyCallback {
 
@@ -113,22 +114,22 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
             val id = dev.key
             val info = dev.value
 
-            var ranges = info.knownDistances?.map {
+            val ranges = info.knownDistances?.map {
                 it.estimatedDistance
             }
-            var positions = info.knownDistances?.map {
+            val positions = info.knownDistances?.map {
                 it.measurementPosition
             }
 
-            // TRILATERIZZA LA NUOVA POSIZIONE
-            // ###############################
-            // ###############################
-            // ###############################
-            val newPosition = LatLng(0.0,0.0)
-            // ###############################
-            // ###############################
-            // ###############################
-            // ##### DEVO UNIRE LE BRANCH ####
+            var newPosition : LatLng
+            if(!(ranges == null || positions == null)){
+                val solver = Trilateration(positions, ranges)
+                newPosition = solver.locate()
+            }
+            else {
+                continue
+            }
+
 
             var pv : PossibleVictimTag
             if(info.personalInfo != null){

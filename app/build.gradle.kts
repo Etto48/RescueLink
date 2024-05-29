@@ -53,6 +53,10 @@ dependencies {
     // To test the Animator APIs
     androidTestImplementation("androidx.core:core-animation-testing:1.0.0")
 
+    // To use the Trilateration Libraries
+    implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation("com.lemmingapex.trilateration:trilateration:1.0.2")
+
     implementation(libs.gson)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
