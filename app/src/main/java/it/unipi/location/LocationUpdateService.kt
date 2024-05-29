@@ -21,12 +21,12 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 
-class LocationUpdateService(var locationInterval: Long = LOCATION_INTERVAL) : Service() {
+class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERVAL) : Service() {
     private val binder = LocalBinder()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
 
-    var loc : Location? = null
+    private var loc : Location? = null
 
     fun getLocation(): Location? {
         try {
@@ -65,7 +65,7 @@ class LocationUpdateService(var locationInterval: Long = LOCATION_INTERVAL) : Se
         Log.i(TAG, "Request created")
     }
 
-    fun checkRequest(){
+    private fun checkRequest(){
         Log.i(TAG, "Checking request")
         val locationSettingsRequest = LocationSettingsRequest.Builder()
             .addLocationRequest(locationRequest)

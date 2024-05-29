@@ -13,13 +13,13 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.location.LocationReceiver
 import it.unipi.location.LocationUpdateService
-import it.unipi.location.onLocationReceivedCallback
+import it.unipi.location.OnLocationReceivedCallback
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
 import it.unipi.rescuelink.maps.SarInfoWindowAdapter
 
-class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -69,7 +69,7 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
         addMyLocation(LatLng(0.0,0.0))
     }
 
-    fun addPossibleVictim(victim: PossibleVictimTag){
+    private fun addPossibleVictim(victim: PossibleVictimTag){
         val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100))
         val marker = mMap.addMarker(markerOpt)
         marker?.snippet = POSSIBLE_VICTIM
@@ -107,9 +107,9 @@ class MapsActivity : AppCompatActivity(), onLocationReceivedCallback, OnMapReady
     }
 
     private fun update(){
-        val nerbyDev = RescueLink.info.nearbyDevicesInfo
+        val nearbyDev = RescueLink.info.nearbyDevicesInfo
 
-        for(dev in nerbyDev){
+        for(dev in nearbyDev){
             val id = dev.key
             val info = dev.value
 

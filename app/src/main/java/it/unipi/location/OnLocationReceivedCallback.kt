@@ -2,6 +2,6 @@ package it.unipi.location
 
 import com.google.android.gms.maps.model.LatLng
 
-interface onLocationReceivedCallback {
+interface OnLocationReceivedCallback {
     fun onLocationReceived(location: LatLng)
 }

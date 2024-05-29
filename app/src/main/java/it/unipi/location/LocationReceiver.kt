@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 
-class LocationReceiver(val callback: onLocationReceivedCallback) : BroadcastReceiver() {
+class LocationReceiver(private val callback: OnLocationReceivedCallback) : BroadcastReceiver() {
     init {
         Log.d(TAG, "init LocationReceiver")
     }
