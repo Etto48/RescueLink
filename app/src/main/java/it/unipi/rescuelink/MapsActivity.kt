@@ -1,23 +1,44 @@
 package it.unipi.rescuelink
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.IntentFilter
 import android.os.Bundle
-
-import com.google.android.gms.maps.CameraUpdateFactory
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
+import it.unipi.rescuelink.location.LocationReceiver
+import it.unipi.rescuelink.location.LocationUpdateService
+import it.unipi.rescuelink.location.OnLocationReceivedCallback
+import it.unipi.rescuelink.maps.IconProvider
+import it.unipi.rescuelink.maps.PossibleVictimTag
+import it.unipi.rescuelink.maps.SarInfoWindowAdapter
+import it.unipi.rescuelink.trilateration.Trilateration
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private lateinit var locationReceiver: LocationReceiver
+
+    private var possibleVictimMarkers = mutableMapOf<String, Marker?>()
+    private var myLocationMarker: Marker? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Register the location receiver
+        locationReceiver = LocationReceiver(this)
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(LocationUpdateService.LOCATION_UPDATE_ACTION)
+        ContextCompat.registerReceiver(this, locationReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -26,6 +47,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(locationReceiver)
     }
 
     /**
@@ -39,10 +66,82 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
+        addMyLocation(LatLng(0.0,0.0))
+    }
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    private fun addPossibleVictim(victim: PossibleVictimTag){
+        val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100))
+        val marker = mMap.addMarker(markerOpt)
+        marker?.snippet = POSSIBLE_VICTIM
+        marker?.tag = victim
+        possibleVictimMarkers[victim.id] = marker
+    }
+
+    private fun updatePossibleVictim(victim: PossibleVictimTag){
+        val marker = possibleVictimMarkers[victim.id]
+        marker?.position = victim.position
+        marker?.tag = victim
+    }
+
+    private fun addMyLocation(latLng: LatLng){
+        val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100))
+        myLocationMarker = mMap.addMarker(markerOpt)
+        myLocationMarker?.snippet = SAR_OPERATOR
+    }
+
+    private fun updateMyLocation(latLng: LatLng) {
+        Log.d(TAG, "updateMyLocation: $latLng")
+        myLocationMarker!!.position = latLng
+    }
+
+    companion object {
+        private const val TAG = "MapsActivity"
+        const val POSSIBLE_VICTIM = "possible_victim"
+        const val SAR_OPERATOR = "sar_operator"
+    }
+
+    override fun onLocationReceived(location: LatLng) {
+        RescueLink.info.thisDeviceInfo.exactPosition = location
+        updateMyLocation(location)
+        update()
+    }
+
+    private fun update() {
+        val nearbyDev = RescueLink.info.nearbyDevicesInfo
+
+        for (dev in nearbyDev) {
+            val id = dev.key
+            val info = dev.value
+
+            val ranges = info.knownDistances?.map { it.estimatedDistance }
+            val positions = info.knownDistances?.map { it.measurementPosition }
+
+            // Ensure both ranges and positions are not null, have at least one element, and are of the same length
+            if (ranges.isNullOrEmpty() || positions.isNullOrEmpty() || ranges.size != positions.size) {
+                continue
+            }
+
+            val solver = Trilateration(positions, ranges)
+            val newPosition = solver.locate()
+
+            val pv = if (info.personalInfo != null) {
+                val name = info.personalInfo!!.completeName
+                val age = info.personalInfo!!.getAge()
+                val weight = info.personalInfo!!.weightKg
+                val hr = info.personalInfo!!.heartBPM
+
+                PossibleVictimTag(id, name, newPosition, age, weight, hr)
+            } else {
+                PossibleVictimTag(id, newPosition)
+            }
+
+            val marker = possibleVictimMarkers[id]
+            if (marker == null) {
+                addPossibleVictim(pv)
+            } else {
+                updatePossibleVictim(pv)
+            }
+        }
     }
 }

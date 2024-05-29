@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">RescueLink</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="tag_age">Age: </string>
+    <string name="tag_weight">Weight: </string>
+    <string name="tag_heart_rate">HR: </string>
+    <string name="current_location">Current Location</string>
+    <string name="possible_victim">Possible Victim</string>
     <string name="ad_hoc_network">AdHocNetwork</string>
 </resources>
