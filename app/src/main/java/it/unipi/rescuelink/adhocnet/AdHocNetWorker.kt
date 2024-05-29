@@ -142,7 +142,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             }
         }
 
-        // THIS FUCKER IS ONLY CALLED ON API >= 33
+        // THIS *** IS ONLY CALLED ON API >= 33
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onCharacteristicRead(
             gatt: BluetoothGatt,
