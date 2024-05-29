@@ -8,7 +8,19 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/button_adhocnetwork"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="128dp"
+        android:text="@string/ad_hoc_network"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_mapsactivity"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="50dp"
@@ -19,17 +31,4 @@
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/position"
-        android:layout_width="209dp"
-        android:layout_height="23dp"
-        android:layout_marginStart="101dp"
-        android:layout_marginTop="173dp"
-        android:layout_marginEnd="101dp"
-        android:layout_marginBottom="431dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
