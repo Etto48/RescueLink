@@ -3,10 +3,13 @@ package it.unipi.rescuelink
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
@@ -25,6 +28,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locationService: LocationUpdateService
     private var isBound = false
+    private val locationServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as LocationUpdateService.LocalBinder
+            locationService = binder.getService()
+        }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         buttonAdHocNetwork.setOnClickListener {this.startAdHocNetwork()}
 
         getPermissions()
+        startLocationService()
     }
 
     private fun changeToMapsView()
@@ -122,5 +135,12 @@ class MainActivity : AppCompatActivity() {
                 .getInstance(applicationContext)
                 .enqueueUniqueWork("AdHocNet", ExistingWorkPolicy.REPLACE, workRequest)
         }
+    }
+
+    private fun startLocationService()
+    {
+        val serviceIntent = Intent(this, LocationUpdateService::class.java)
+        bindService(serviceIntent, locationServiceConnection, BIND_AUTO_CREATE)
+        startService(serviceIntent)
     }
 }

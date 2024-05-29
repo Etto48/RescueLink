@@ -244,7 +244,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         {
             Log.e("AdHocNet", "Failed to add characteristic to service")
         }
-        if (!this.bluetoothGattServer!!.addService(infoService))
+        if (this.bluetoothGattServer?.addService(infoService) != true)
         {
             Log.e("AdHocNet", "Failed to add service to GATT server")
         }
@@ -271,6 +271,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun loop() {
+        Log.d("AdHocNet", "Current location: ${RescueLink.info.thisDeviceInfo.exactPosition}")
         for ((_, gatt) in connectedGattSet) {
             val service = gatt.getService(infoService.uuid)
             val characteristic = service?.getCharacteristic(infoCharacteristic.uuid)

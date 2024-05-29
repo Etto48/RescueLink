@@ -102,7 +102,6 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     }
 
     override fun onLocationReceived(location: LatLng) {
-        RescueLink.info.thisDeviceInfo.exactPosition = location
         updateMyLocation(location)
         update()
     }

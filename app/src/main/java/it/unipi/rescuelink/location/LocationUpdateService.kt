@@ -18,7 +18,9 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
+import it.unipi.rescuelink.RescueLink
 
 class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERVAL) : Service() {
     private val binder = LocalBinder()
@@ -98,8 +100,13 @@ class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERV
             for (location in locationResult.locations)
                 Log.i(TAG, "Location: ${location.latitude} ${location.longitude}")
 
-            locationResult.lastLocation?.let { sendLocationBroadcast(it) }
+            locationResult.lastLocation?.let { updateCurrentLocation(it) }
         }
+    }
+
+    private fun updateCurrentLocation(location: Location) {
+        RescueLink.info.thisDeviceInfo.exactPosition = LatLng(location.latitude, location.longitude)
+        sendLocationBroadcast(location)
     }
 
     private fun sendLocationBroadcast(location: Location) {
