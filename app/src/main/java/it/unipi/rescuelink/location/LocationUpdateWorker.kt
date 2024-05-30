@@ -3,12 +3,10 @@ package it.unipi.rescuelink.location
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.core.app.ActivityCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -23,7 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import it.unipi.rescuelink.RescueLink
 
-class LocationUpdateService(appContext: Context, workerParameters: WorkerParameters) :
+class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParameters) :
     Worker(appContext, workerParameters) {
 
     private val context = appContext
@@ -68,9 +66,6 @@ class LocationUpdateService(appContext: Context, workerParameters: WorkerParamet
     private val callback = object: LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
-            Log.i(TAG, "Location received")
-            for (location in locationResult.locations)
-                Log.i(TAG, "Location: ${location.latitude} ${location.longitude}")
 
             locationResult.lastLocation?.let { updateCurrentLocation(it) }
         }
@@ -82,7 +77,7 @@ class LocationUpdateService(appContext: Context, workerParameters: WorkerParamet
     }
 
     private fun sendLocationBroadcast(location: Location) {
-        Log.i(TAG, "Sending location broadcast")
+        Log.d(TAG, "Sending location broadcast")
         Intent(LOCATION_UPDATE_ACTION).also { intent ->
             intent.putExtra(LOCATION_LATITUDE, location.latitude)
             intent.putExtra(LOCATION_LONGITUDE, location.longitude)
@@ -91,27 +86,24 @@ class LocationUpdateService(appContext: Context, workerParameters: WorkerParamet
     }
 
     override fun doWork(): Result {
-        var hasPermissions = false
-        while (!hasPermissions)
-        {
-            hasPermissions = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            Thread.sleep(1000)
+        try {
+            start()
+            return Result.success()
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Missing permissions")
+            return Result.failure()
         }
-        start()
-        return Result.success()
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private fun start() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        Log.i(TAG, "Service created")
         locationRequest = LocationRequest.Builder(locationInterval)
             .setIntervalMillis(locationInterval)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
 
         checkRequest()
-        Log.i(TAG, "Request created")
 
         startLocationUpdates()
     }
@@ -119,6 +111,7 @@ class LocationUpdateService(appContext: Context, workerParameters: WorkerParamet
     // Delete me if the location stops working unexpectedly
     override fun onStopped() {
         super.onStopped()
+        Log.w(TAG, "Worker stopped")
         stopLocationUpdates()
     }
 

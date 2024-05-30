@@ -3,41 +3,45 @@ package it.unipi.rescuelink
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import it.unipi.rescuelink.location.LocationUpdateService
+import it.unipi.rescuelink.adhocnet.AdHocNetWorker
+import it.unipi.rescuelink.location.LocationUpdateWorker
+import java.time.Duration
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var locationService: LocationUpdateService
-    private var isBound = false
-    private val locationServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as LocationUpdateService.LocalBinder
-            locationService = binder.getService()
-        }
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { isGranted: Map<String, @JvmSuppressWildcards Boolean> ->
+        if (isGranted.all { it.value }) {
+            startBackgroundWorkers()
+        } else {
+            for (permission in isGranted) {
+                if (!permission.value) {
+                    Toast.makeText(this, "Permission ${permission.key} not granted", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            Toast.makeText(this, "All permissions are required to use the app", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,13 +52,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         val buttonMapsActivity = findViewById<Button>(R.id.button_mapsactivity)
-        buttonMapsActivity.setOnClickListener {this.changeToMapsView()}
-
-        val buttonAdHocNetwork = findViewById<Button>(R.id.button_adhocnetwork)
-        buttonAdHocNetwork.setOnClickListener {this.startAdHocNetwork()}
+        buttonMapsActivity.setOnClickListener {changeToMapsView()}
 
         getPermissions()
-        startLocationService()
     }
 
     private fun changeToMapsView()
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPermissions()
     {
-        val permissionSet: Array<String>
+        var permissionSet: Array<String>
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionSet = arrayOf(
                 Manifest.permission.BLUETOOTH_CONNECT,
@@ -96,18 +96,28 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        permissionSet.forEach { permission ->
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(permission), 1
-                )
-            }
+        permissionSet = permissionSet.filter {
+            ContextCompat.checkSelfPermission(
+                this,
+                it
+            ) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
+        if (permissionSet.isEmpty())
+        {
+            startBackgroundWorkers()
         }
+        else
+        {
+            requestPermissionLauncher.launch(permissionSet)
+        }
+    }
+
+    private fun startBackgroundWorkers()
+    {
+        startAdHocNetwork()
+        startLocationUpdate()
+        Toast.makeText(this, "Background workers started", Toast.LENGTH_LONG).show()
     }
 
     private fun startAdHocNetwork()
@@ -130,17 +140,25 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Log.d("AdHocNet", "Starting ad-hoc network")
-            val workRequest = OneTimeWorkRequestBuilder<it.unipi.rescuelink.adhocnet.AdHocNetWorker>().build()
+            val workRequest =
+                PeriodicWorkRequestBuilder<AdHocNetWorker>(
+                    Duration.ofSeconds(15*60)
+                ).build()
             WorkManager
                 .getInstance(applicationContext)
-                .enqueueUniqueWork("AdHocNet", ExistingWorkPolicy.REPLACE, workRequest)
+                .enqueueUniquePeriodicWork("AdHocNet", ExistingPeriodicWorkPolicy.KEEP, workRequest)
         }
     }
 
-    private fun startLocationService()
+    private fun startLocationUpdate()
     {
-        val serviceIntent = Intent(this, LocationUpdateService::class.java)
-        bindService(serviceIntent, locationServiceConnection, BIND_AUTO_CREATE)
-        startService(serviceIntent)
+        Log.d("AdHocNet", "Starting ad-hoc network")
+        val workRequest =
+            PeriodicWorkRequestBuilder<LocationUpdateWorker>(
+                Duration.ofSeconds(15*60)
+            ).build()
+        WorkManager
+            .getInstance(applicationContext)
+            .enqueueUniquePeriodicWork("LocationUpdate", ExistingPeriodicWorkPolicy.KEEP, workRequest)
     }
 }

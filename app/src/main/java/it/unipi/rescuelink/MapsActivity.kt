@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
 import it.unipi.rescuelink.location.LocationReceiver
-import it.unipi.rescuelink.location.LocationUpdateService
+import it.unipi.rescuelink.location.LocationUpdateWorker
 import it.unipi.rescuelink.location.OnLocationReceivedCallback
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
@@ -37,7 +37,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
         // Register the location receiver
         locationReceiver = LocationReceiver(this)
         val intentFilter = IntentFilter()
-        intentFilter.addAction(LocationUpdateService.LOCATION_UPDATE_ACTION)
+        intentFilter.addAction(LocationUpdateWorker.LOCATION_UPDATE_ACTION)
         ContextCompat.registerReceiver(this, locationReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
