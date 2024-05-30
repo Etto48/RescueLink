@@ -1,15 +1,16 @@
 package it.unipi.rescuelink.location
 
 import android.Manifest
-import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Binder
-import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -22,31 +23,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import it.unipi.rescuelink.RescueLink
 
-class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERVAL) : Service() {
-    private val binder = LocalBinder()
+class LocationUpdateService(appContext: Context, workerParameters: WorkerParameters) :
+    Worker(appContext, workerParameters) {
+
+    private val context = appContext
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
+    private var locationInterval: Long = LOCATION_INTERVAL
 
-    override fun onCreate() {
-        super.onCreate()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        Log.i(TAG, "Service created")
-        locationRequest = LocationRequest.Builder(locationInterval)
-            .setIntervalMillis(locationInterval)
-            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .build()
-
-        checkRequest()
-        Log.i(TAG, "Request created")
-    }
-
-    private fun checkRequest(){
+    private fun checkRequest() {
         Log.i(TAG, "Checking request")
         val locationSettingsRequest = LocationSettingsRequest.Builder()
             .addLocationRequest(locationRequest)
             .build()
 
-        val settingClient = LocationServices.getSettingsClient(this)
+        val settingClient = LocationServices.getSettingsClient(context)
         settingClient.checkLocationSettings(locationSettingsRequest).addOnCompleteListener(
             fun(task: Task<LocationSettingsResponse>) {
                 if (task.isSuccessful) {
@@ -58,27 +49,8 @@ class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERV
         )
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        startLocationUpdates()
-        Log.i(TAG, "Service started")
-        return START_STICKY
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopLocationUpdates()
-        Log.i(TAG, "Service destroyed")
-    }
-
-    private fun startLocationUpdates(){
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "Missing location permission")
-            stopSelf()
-            return
-        }
-
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun startLocationUpdates() {
         val task = fusedLocationClient.requestLocationUpdates(
             locationRequest,
             callback,
@@ -88,12 +60,12 @@ class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERV
         task.addOnFailureListener { Log.d(TAG, "Failure in registration: " + it.message) }
     }
 
-    private fun stopLocationUpdates(){
+    private fun stopLocationUpdates() {
         Log.i(TAG, "Stopping location updates")
         fusedLocationClient.removeLocationUpdates(callback)
     }
 
-    private val callback = object: LocationCallback(){
+    private val callback = object: LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             Log.i(TAG, "Location received")
@@ -114,26 +86,45 @@ class LocationUpdateService(private var locationInterval: Long = LOCATION_INTERV
         Intent(LOCATION_UPDATE_ACTION).also { intent ->
             intent.putExtra(LOCATION_LATITUDE, location.latitude)
             intent.putExtra(LOCATION_LONGITUDE, location.longitude)
-            sendBroadcast(intent)
+            context.sendBroadcast(intent)
         }
     }
 
-    inner class LocalBinder : Binder() {
-        internal val service: LocationUpdateService
-            get() = this@LocationUpdateService
-
-        fun getService(): LocationUpdateService {
-            return this@LocationUpdateService
+    override fun doWork(): Result {
+        var hasPermissions = false
+        while (!hasPermissions)
+        {
+            hasPermissions = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            Thread.sleep(1000)
         }
+        start()
+        return Result.success()
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-        return binder
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun start() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        Log.i(TAG, "Service created")
+        locationRequest = LocationRequest.Builder(locationInterval)
+            .setIntervalMillis(locationInterval)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .build()
+
+        checkRequest()
+        Log.i(TAG, "Request created")
+
+        startLocationUpdates()
+    }
+
+    // Delete me if the location stops working unexpectedly
+    override fun onStopped() {
+        super.onStopped()
+        stopLocationUpdates()
     }
 
     companion object {
         private const val TAG = "LocationService"
-        private const val LOCATION_INTERVAL = 5000L
+        private const val LOCATION_INTERVAL = 15000L
         const val LOCATION_LATITUDE = "latitude"
         const val LOCATION_LONGITUDE = "longitude"
         const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
