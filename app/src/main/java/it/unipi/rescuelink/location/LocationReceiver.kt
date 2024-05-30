@@ -14,9 +14,9 @@ class LocationReceiver(private val callback: OnLocationReceivedCallback) : Broad
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "onReceive "+ intent?.action)
         Log.d(TAG, "onReceive "+ context?.javaClass)
-        if (intent?.action == LocationUpdateService.LOCATION_UPDATE_ACTION) {
-            val latitude = intent.getDoubleExtra(LocationUpdateService.LOCATION_LATITUDE, 0.0)
-            val longitude = intent.getDoubleExtra(LocationUpdateService.LOCATION_LONGITUDE, 0.0)
+        if (intent?.action == LocationUpdateWorker.LOCATION_UPDATE_ACTION) {
+            val latitude = intent.getDoubleExtra(LocationUpdateWorker.LOCATION_LATITUDE, 0.0)
+            val longitude = intent.getDoubleExtra(LocationUpdateWorker.LOCATION_LONGITUDE, 0.0)
             Log.d(TAG, "Lat: $latitude, Lon: $longitude")
             callback.onLocationReceived(LatLng(latitude, longitude))
         }
