@@ -53,7 +53,10 @@ class MainActivity : AppCompatActivity() {
         }
         val buttonMapsActivity = findViewById<Button>(R.id.button_mapsactivity)
         buttonMapsActivity.setOnClickListener {changeToMapsView()}
+    }
 
+    override fun onStart() {
+        super.onStart()
         getPermissions()
     }
 

@@ -4,6 +4,8 @@
     <string name="tag_age">Age: </string>
     <string name="tag_weight">Weight: </string>
     <string name="tag_heart_rate">HR: </string>
+    <string name="tag_device_name">Dev: </string>
+    <string name="unknown_device_name">Unknown Device</string>
     <string name="current_location">Current Location</string>
     <string name="possible_victim">Possible Victim</string>
 </resources>
