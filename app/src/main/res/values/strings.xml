@@ -6,4 +6,10 @@
     <string name="tag_heart_rate">HR: </string>
     <string name="current_location">Current Location</string>
     <string name="possible_victim">Possible Victim</string>
+    <string name="title_activity_info">UserInfoActivity</string>
+    <string name="name_userinfo">Name</string>
+    <string name="surname_userinfo">Surename</string>
+    <string name="birthdate_userinfo">Date of birth</string>
+    <string name="weight_userinfo">Weight</string>
+    <string name="save_userinfo">Save</string>
 </resources>

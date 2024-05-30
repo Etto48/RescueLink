@@ -54,7 +54,20 @@ class MainActivity : AppCompatActivity() {
         val buttonMapsActivity = findViewById<Button>(R.id.button_mapsactivity)
         buttonMapsActivity.setOnClickListener {changeToMapsView()}
 
+        val buttonUserInfoActivity = findViewById<Button>(R.id.button_infoactivity)
+        buttonUserInfoActivity.setOnClickListener {changeToUserInfoView()}
+
         getPermissions()
+    }
+
+    private fun changeToUserInfoView() {
+        Log.d(null, "Changing to user info view")
+        try {
+            startActivity(Intent(this, UserInfoActivity::class.java))
+        }
+        catch (e: Exception){
+            Log.e("MainActivity", e.message.toString())
+        }
     }
 
     private fun changeToMapsView()
