@@ -1,13 +1,13 @@
-package it.unipi.rescuelink
+package it.unipi.rescuelink.UserInfo
 
 import android.app.DatePickerDialog
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import it.unipi.rescuelink.R
+import it.unipi.rescuelink.RescueLink
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -19,24 +19,26 @@ class UserInfoActivity : AppCompatActivity() {
     private lateinit var etSurname: EditText
     private lateinit var etName: EditText
     private lateinit var btnSave: Button
+    private lateinit var userInfoManager: UserInfoManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_info)
-        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+        userInfoManager = UserInfoManager(this)
 
         etName = findViewById(R.id.etName)
         etSurname = findViewById(R.id.etSurname)
         etBirthDate = findViewById(R.id.etBirthDate)
         etWeight = findViewById(R.id.etWeight)
-
         btnSave = findViewById(R.id.btnSave)
 
         // Carica i dati salvati (se esistono)
-        loadUserData(sharedPreferences)
+        loadUserData()
 
         btnSave.setOnClickListener {
-            saveUserData(sharedPreferences)
+            saveUserData()
+            RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
             Toast.makeText(this, R.string.saved_message, Toast.LENGTH_SHORT).show()
         }
 
@@ -54,41 +56,28 @@ class UserInfoActivity : AppCompatActivity() {
         val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
             val selectedDate = Calendar.getInstance()
             selectedDate.set(selectedYear, selectedMonth, selectedDay)
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             etBirthDate.setText(dateFormat.format(selectedDate.time))
         }, year, month, day)
 
         datePickerDialog.show()
     }
 
-    private fun loadUserData(sharedPreferences: SharedPreferences) {
-        val name = sharedPreferences.getString("name", "")
-        val surname = sharedPreferences.getString("surname", "")
-        val birthDate = sharedPreferences.getString("birthDate", "")
-        val weight = sharedPreferences.getString("weight", "")
-
-        etName.setText(name)
-        etSurname.setText(surname)
-        etBirthDate.setText(birthDate)
-        etWeight.setText(weight)
+    private fun loadUserData() {
+        etName.setText(userInfoManager.name)
+        etSurname.setText(userInfoManager.surname)
+        etBirthDate.setText(userInfoManager.birthDate)
+        etWeight.setText(userInfoManager.weight)
     }
 
-    private fun saveUserData(sharedPreferences: SharedPreferences) {
-        val name = etName.text.toString()
-        val surname = etSurname.text.toString()
-        val birthDate = etBirthDate.text.toString()
-        val weight = etWeight.text.toString()
-
-        with(sharedPreferences.edit()) {
-            putString("name", name)
-            putString("surname", surname)
-            putString("birthDate", birthDate)
-            putString("weight", weight)
-            apply()
-        }
+    private fun saveUserData() {
+        userInfoManager.name = etName.text.toString()
+        userInfoManager.surname = etSurname.text.toString()
+        userInfoManager.birthDate = etBirthDate.text.toString()
+        userInfoManager.weight = etWeight.text.toString()
     }
 
-    companion object{
+    companion object {
         private const val TAG = "UserInfoActivity"
     }
 }
