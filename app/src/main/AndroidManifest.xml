@@ -55,6 +55,9 @@
             android:name=".DebugView"
             android:exported="false"
             android:theme="@style/Theme.RescueLink" />
+        <activity
+            android:name=".UserInfoActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -108,5 +111,4 @@
             </intent-filter>
         </receiver>
     </application>
-
 </manifest>

@@ -73,7 +73,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     private fun addPossibleVictim(victim: PossibleVictimTag){
         val markerOpt = MarkerOptions()
             .position(victim.position)
-            .icon(IconProvider.getVictimIcon(this,100))
+            .icon(IconProvider.getVictimIcon(this,100)).anchor(0.5f,0.5f)
         val marker = mMap.addMarker(markerOpt)
         marker?.snippet = POSSIBLE_VICTIM
         marker?.tag = victim
@@ -87,7 +87,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     }
 
     private fun addMyLocation(latLng: LatLng){
-        val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100))
+        val markerOpt = MarkerOptions().position(latLng).title("Current Location").icon(IconProvider.getSarIcon(this,100)).anchor(0.5f,0.5f)
         myLocationMarker = mMap.addMarker(markerOpt)
         myLocationMarker?.snippet = SAR_OPERATOR
     }
