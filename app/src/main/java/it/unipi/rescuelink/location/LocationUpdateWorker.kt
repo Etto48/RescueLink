@@ -87,6 +87,7 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
 
     override fun doWork(): Result {
         try {
+            Log.d(TAG, "Starting location updates")
             start()
             return Result.success()
         } catch (e: SecurityException) {
@@ -106,13 +107,6 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
         checkRequest()
 
         startLocationUpdates()
-    }
-
-    // Delete me if the location stops working unexpectedly
-    override fun onStopped() {
-        super.onStopped()
-        Log.w(TAG, "Worker stopped")
-        stopLocationUpdates()
     }
 
     companion object {

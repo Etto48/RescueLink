@@ -67,7 +67,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
-        addMyLocation(LatLng(0.0,0.0))
+        addMyLocation(RescueLink.info.thisDeviceInfo.exactPosition ?: LatLng(0.0, 0.0))
     }
 
     private fun addPossibleVictim(victim: PossibleVictimTag){
