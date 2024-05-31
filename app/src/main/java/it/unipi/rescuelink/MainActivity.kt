@@ -57,6 +57,13 @@ class MainActivity : AppCompatActivity() {
         val buttonUserInfoActivity = findViewById<Button>(R.id.button_infoactivity)
         buttonUserInfoActivity.setOnClickListener {changeToUserInfoView()}
 
+        val buttonDebugActivity = findViewById<Button>(R.id.button_debugactivity)
+        buttonDebugActivity.setOnClickListener {changeToDebugView()}
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         getPermissions()
     }
 
@@ -74,6 +81,12 @@ class MainActivity : AppCompatActivity() {
     {
         Log.d(null, "Changing to map view")
         startActivity(Intent(this, MapsActivity::class.java))
+    }
+
+    private fun changeToDebugView()
+    {
+        Log.d(null, "Changing to debug view")
+        startActivity(Intent(this, DebugActivity::class.java))
     }
 
     private fun getPermissions()

@@ -16,4 +16,12 @@
         android:textStyle="bold"
         tools:text="Current Location"/>
 
+    <TextView
+        android:id="@+id/device_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        tools:text="John's A50"/>
+
 </LinearLayout>

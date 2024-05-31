@@ -170,6 +170,8 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                         val distanceInfo = DistanceInfo(distance, RescueLink.info.thisDeviceInfo.exactPosition!!)
                         if (RescueLink.info.nearbyDevicesInfo[result.device.address] == null) {
                             val newInfo = DeviceInfo()
+                            newInfo.deviceName = result.device.name
+                            Log.d("AdHocNet", "New device found: ${result.device.name}")
                             newInfo.addDistanceInfo(distanceInfo)
                             RescueLink.info.nearbyDevicesInfo[result.device.address] = newInfo
                         } else {
@@ -271,7 +273,6 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun loop() {
-        Log.d("AdHocNet", "Current location: ${RescueLink.info.thisDeviceInfo.exactPosition}")
         for ((_, gatt) in connectedGattSet) {
             val service = gatt.getService(infoService.uuid)
             val characteristic = service?.getCharacteristic(infoCharacteristic.uuid)

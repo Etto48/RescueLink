@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.gson.Gson
 import it.unipi.rescuelink.adhocnet.DeviceInfo
 
+
 class RescueLink : Application() {
 
     class Info (
@@ -22,6 +23,7 @@ class RescueLink : Application() {
             )
         }
 
+        @Synchronized
         fun merge(srcAddress: String, info: Info) {
             for ((address, deviceInfo) in info.nearbyDevicesInfo) {
                 val currentDeviceInfo = nearbyDevicesInfo[address]

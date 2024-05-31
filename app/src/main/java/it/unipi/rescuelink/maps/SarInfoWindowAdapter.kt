@@ -38,6 +38,10 @@ class SarInfoWindowAdapter(
                     R.id.title
                 ).text = context.getString(R.string.possible_victim)
 
+                view.findViewById<TextView>(
+                    R.id.device_name
+                ).text = victim.deviceName ?: context.getString(R.string.unknown_device_name)
+
                 return view
             }
 
@@ -50,6 +54,10 @@ class SarInfoWindowAdapter(
             view.findViewById<TextView>(
                 R.id.name
             ).text = victim.name
+
+            view.findViewById<TextView>(
+                R.id.device_name
+            ).text = victim.deviceName ?: context.getString(R.string.unknown_device_name)
 
             view.findViewById<TextView>(
                 R.id.age

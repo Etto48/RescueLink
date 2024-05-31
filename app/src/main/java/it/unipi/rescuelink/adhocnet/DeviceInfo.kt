@@ -6,6 +6,7 @@ import java.time.OffsetDateTime
 class DeviceInfo(
     exactPosition: LatLng? = null,
     personalInfo: PersonalInfo? = null,
+    deviceName: String? = null,
     var knownDistances: MutableList<DistanceInfo>? = null
 ) {
     private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
@@ -21,6 +22,12 @@ class DeviceInfo(
         }
 
     var personalInfo: PersonalInfo? = personalInfo
+        set(value) {
+            field = value
+            updateTimestamp()
+        }
+
+    var deviceName: String? = deviceName
         set(value) {
             field = value
             updateTimestamp()
@@ -47,12 +54,14 @@ class DeviceInfo(
         {
             ret.exactPosition = exactPosition
             ret.personalInfo = personalInfo
+            ret.deviceName = deviceName
             ret.timestamp = timestamp
         }
         else
         {
             ret.exactPosition = other.exactPosition
             ret.personalInfo = other.personalInfo
+            ret.deviceName = other.deviceName
             ret.timestamp = other.timestamp
         }
 

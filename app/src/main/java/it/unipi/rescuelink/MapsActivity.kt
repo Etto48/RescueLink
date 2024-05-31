@@ -67,11 +67,13 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setInfoWindowAdapter(SarInfoWindowAdapter(this))
-        addMyLocation(LatLng(0.0,0.0))
+        addMyLocation(RescueLink.info.thisDeviceInfo.exactPosition ?: LatLng(0.0, 0.0))
     }
 
     private fun addPossibleVictim(victim: PossibleVictimTag){
-        val markerOpt = MarkerOptions().position(victim.position).icon(IconProvider.getVictimIcon(this,100)).anchor(0.5f,0.5f)
+        val markerOpt = MarkerOptions()
+            .position(victim.position)
+            .icon(IconProvider.getVictimIcon(this,100)).anchor(0.5f,0.5f)
         val marker = mMap.addMarker(markerOpt)
         marker?.snippet = POSSIBLE_VICTIM
         marker?.tag = victim
@@ -130,9 +132,9 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
                 val weight = info.personalInfo!!.weightKg
                 val hr = info.personalInfo!!.heartBPM
 
-                PossibleVictimTag(id, name, newPosition, age, weight, hr)
+                PossibleVictimTag(id, info.deviceName, name, newPosition, age, weight, hr)
             } else {
-                PossibleVictimTag(id, newPosition)
+                PossibleVictimTag(id, info.deviceName, newPosition)
             }
 
             val marker = possibleVictimMarkers[id]
