@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -36,6 +37,7 @@ class UserInfoActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             saveUserData(sharedPreferences)
+            Toast.makeText(this, R.string.saved_message, Toast.LENGTH_SHORT).show()
         }
 
         etBirthDate.setOnClickListener {

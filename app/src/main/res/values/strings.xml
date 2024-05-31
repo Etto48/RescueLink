@@ -12,4 +12,5 @@
     <string name="birthdate_userinfo">Date of birth</string>
     <string name="weight_userinfo">Weight</string>
     <string name="save_userinfo">Save</string>
+    <string name="saved_message">Data Saved</string>
 </resources>
