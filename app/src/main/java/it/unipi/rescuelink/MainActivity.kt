@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -58,7 +59,12 @@ class MainActivity : AppCompatActivity() {
 
         val buttonUserInfoActivity = findViewById<Button>(R.id.button_infoactivity)
         buttonUserInfoActivity.setOnClickListener {changeToUserInfoView()}
-        var userInfoManager = UserInfoManager(this)
+
+        val switchSARMode = findViewById<SwitchCompat>(R.id.switch_sar_mode)
+        switchSARMode.setOnCheckedChangeListener { _, isChecked ->
+            RescueLink.info.thisDeviceInfo.isSAR = isChecked
+        }
+        val userInfoManager = UserInfoManager(this)
         RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
 
         val buttonDebugActivity = findViewById<Button>(R.id.button_debugactivity)
