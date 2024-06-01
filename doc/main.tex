@@ -1,0 +1,94 @@
+\documentclass{article}
+\usepackage{multicol}
+\usepackage{graphicx}
+\title{RescueLink: A Mobile Application for Victim Localization in Emergency Situations}
+\author{Paolo Palumbo, Ettore Ricci}
+\begin{document}
+\maketitle
+\begin{abstract}
+In emergency situations, rapid
+and accurate localization of potential 
+victims is crucial for effective rescue operations.
+This project presents an innovative Android 
+application using Bluetooth Low Energy (BLE) 
+technology, trilateration, and GPS to enhance 
+victim localization. 
+The system ustilizes an ah-hoc BLE network
+to share information between devices and 
+computes the victim's position using trilateration 
+when GPS is not available.
+\end{abstract}
+\begin{multicols}{2}
+\section{Introduction}
+During emergency situations such as natural 
+disasters, fires, and large-scale accidents, 
+the timely and accurate localization of 
+potential victims is foundational to effective
+rescue operations. 
+Current methods usually rely on visual searches
+and may be ineffective in low-visibility scenarios.
+Due to the influence of modern technology, 
+the majority of people carry smartphones and other
+BLE-enabled devices with them. 
+This project aims to leverage these devices to
+localize victims in emergency situations.
+A version of the application can also be installed
+on the victim's device to further enhance the
+localization process.
+\section{Background}
+\subsection{Bluetooth Low Energy}
+Bluetooth Low Energy (BLE) is a wireless 
+communication technology designed for short-range
+data transmission with minimal power consumption. 
+Experimental tests have shown that BLE can cover 
+up to 200 meters in an open 
+field\cite{Lodeiro_Santiago_2017}.
+Introduced as part of the Bluetooth 4.0 
+specification, BLE is optimized for applications 
+requiring intermittent data transfers, this makes
+it ideal for use in mobile devices.
+\subsection{GPS}
+Global Positioning System (GPS) is a 
+satellite-based localization system that
+provides accurate position information
+to GPS-enabled devices.
+GPS uses the travel time of signals to estimate
+the distance between the device and the satellites, 
+then trilateration is used to determine the 
+device's position.
+\subsection{Trilateration}
+Trilateration is a geometric technique 
+used to determine the position of a point 
+by measuring the distances from that point 
+to three or more known locations.
+The implementation of trilateration in this
+project solves an optimization problem to find
+the victim's position with the lowest error.
+To estimate the distance between the victim and
+the BLE devices, the Received Signal Strength
+(RSS) is used.
+\subsection{RSS}
+The Received Signal Strength (RSS) is a measure
+of the power level of a received signal. 
+Combined with the path loss model, and knowing the
+transmit power, the RSS can be used to estimate
+the distance between the transmitter and the 
+receiver.
+RSSI is the Received Signal Strength Indicator,
+a value that represents the power level of the
+received signal in dBm.
+The formula used to estimate the distance is:
+\begin{equation}
+    D=10^{\frac{txPower - RSSI}{10 * n}}
+\end{equation}
+We used $n=2$ as the path loss exponent because
+we expect a typical outdoor environment.
+\section{System Design}
+\subsection{Application Interface}
+\subsection{Data Sharing}
+\section{Results}
+\section{Conclusion}
+\end{multicols}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}
