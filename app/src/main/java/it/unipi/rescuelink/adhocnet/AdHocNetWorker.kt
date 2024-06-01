@@ -222,7 +222,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                     Log.e("AdHocNet", "Bluetooth disabled")
                 }
                 runBlocking {
-                    delay(15000)
+                    delay(RescueLink.UPDATE_INTERVAL_MS)
                 }
             }
         }
