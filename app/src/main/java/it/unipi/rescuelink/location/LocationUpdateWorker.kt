@@ -27,7 +27,6 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
     private val context = appContext
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private var locationInterval: Long = LOCATION_INTERVAL
 
     private fun checkRequest() {
         Log.i(TAG, "Checking request")
@@ -99,8 +98,8 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private fun start() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        locationRequest = LocationRequest.Builder(locationInterval)
-            .setIntervalMillis(locationInterval)
+        locationRequest = LocationRequest.Builder(RescueLink.UPDATE_INTERVAL_MS)
+            .setIntervalMillis(RescueLink.UPDATE_INTERVAL_MS)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
 
@@ -111,7 +110,6 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
 
     companion object {
         private const val TAG = "LocationService"
-        private const val LOCATION_INTERVAL = 15000L
         const val LOCATION_LATITUDE = "latitude"
         const val LOCATION_LONGITUDE = "longitude"
         const val LOCATION_UPDATE_ACTION = "it.unipi.location.LOCATION_UPDATE"
