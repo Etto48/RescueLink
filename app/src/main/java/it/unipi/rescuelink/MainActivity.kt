@@ -20,6 +20,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import it.unipi.rescuelink.UserInfo.UserInfoActivity
+import it.unipi.rescuelink.UserInfo.UserInfoManager
 import it.unipi.rescuelink.adhocnet.AdHocNetWorker
 import it.unipi.rescuelink.location.LocationUpdateWorker
 import java.time.Duration
@@ -56,6 +58,8 @@ class MainActivity : AppCompatActivity() {
 
         val buttonUserInfoActivity = findViewById<Button>(R.id.button_infoactivity)
         buttonUserInfoActivity.setOnClickListener {changeToUserInfoView()}
+        var userInfoManager = UserInfoManager(this)
+        RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
 
         val buttonDebugActivity = findViewById<Button>(R.id.button_debugactivity)
         buttonDebugActivity.setOnClickListener {changeToDebugView()}
