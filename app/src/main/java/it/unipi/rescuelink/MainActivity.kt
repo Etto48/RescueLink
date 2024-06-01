@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     {
         startAdHocNetwork()
         startLocationUpdate()
-        Toast.makeText(this, "Background workers started", Toast.LENGTH_LONG).show()
+        // Toast.makeText(this, "Background workers started", Toast.LENGTH_LONG).show()
     }
 
     private fun startAdHocNetwork()
