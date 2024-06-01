@@ -7,6 +7,7 @@ class DeviceInfo(
     exactPosition: LatLng? = null,
     personalInfo: PersonalInfo? = null,
     deviceName: String? = null,
+    var isSAR: Boolean = false,
     var knownDistances: MutableList<DistanceInfo>? = null
 ) {
     private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
@@ -55,6 +56,7 @@ class DeviceInfo(
             ret.exactPosition = exactPosition
             ret.personalInfo = personalInfo
             ret.deviceName = deviceName
+            ret.isSAR = isSAR
             ret.timestamp = timestamp
         }
         else
@@ -62,6 +64,7 @@ class DeviceInfo(
             ret.exactPosition = other.exactPosition
             ret.personalInfo = other.personalInfo
             ret.deviceName = other.deviceName
+            ret.isSAR = other.isSAR
             ret.timestamp = other.timestamp
         }
 
