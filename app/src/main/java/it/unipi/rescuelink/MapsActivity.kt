@@ -11,6 +11,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import it.unipi.rescuelink.adhocnet.DeviceInfo
 import it.unipi.rescuelink.databinding.ActivityMapsBinding
 import it.unipi.rescuelink.location.LocationReceiver
 import it.unipi.rescuelink.location.LocationUpdateWorker
@@ -18,6 +19,7 @@ import it.unipi.rescuelink.location.OnLocationReceivedCallback
 import it.unipi.rescuelink.maps.IconProvider
 import it.unipi.rescuelink.maps.PossibleVictimTag
 import it.unipi.rescuelink.maps.SarInfoWindowAdapter
+import it.unipi.rescuelink.maps.SarOperatorTag
 import it.unipi.rescuelink.trilateration.Trilateration
 
 class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReadyCallback {
@@ -27,6 +29,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
     private lateinit var locationReceiver: LocationReceiver
 
     private var possibleVictimMarkers = mutableMapOf<String, Marker?>()
+    private var sarOperatorMarkers = mutableMapOf<String, Marker?>()
     private var myLocationMarker: Marker? = null
 
 
@@ -80,6 +83,22 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
         possibleVictimMarkers[victim.id] = marker
     }
 
+    private fun addSarOperator(sarOperator: SarOperatorTag){
+        val markerOpt = MarkerOptions()
+            .position(sarOperator.position)
+            .icon(IconProvider.getSarIcon(this,100)).anchor(0.5f,0.5f)
+        val marker = mMap.addMarker(markerOpt)
+        marker?.snippet = SAR_OPERATOR
+        marker?.tag = sarOperator
+        sarOperatorMarkers[sarOperator.id] = marker
+    }
+
+    private fun updateSarOperator(sarOperator: SarOperatorTag){
+        val marker = sarOperatorMarkers[sarOperator.id]
+        marker?.position = sarOperator.position
+        marker?.tag = sarOperator
+    }
+
     private fun updatePossibleVictim(victim: PossibleVictimTag){
         val marker = possibleVictimMarkers[victim.id]
         marker?.position = victim.position
@@ -101,6 +120,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
         private const val TAG = "MapsActivity"
         const val POSSIBLE_VICTIM = "possible_victim"
         const val SAR_OPERATOR = "sar_operator"
+        const val CURRENT_OPERATOR = "current_operator"
     }
 
     override fun onLocationReceived(location: LatLng) {
@@ -123,26 +143,49 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
                 continue
             }
 
-            val solver = Trilateration(positions, ranges)
-            val newPosition = info.exactPosition ?: solver.locate()
-
-            val pv = if (info.personalInfo != null) {
-                val name = info.personalInfo!!.completeName
-                val age = info.personalInfo!!.getAge()
-                val weight = info.personalInfo!!.weightKg
-                val hr = info.personalInfo!!.heartBPM
-
-                PossibleVictimTag(id, info.deviceName, name, newPosition, age, weight, hr)
+            if (info.isSAR) {
+                handleSarOperator(id, info)
             } else {
-                PossibleVictimTag(id, info.deviceName, newPosition)
-            }
-
-            val marker = possibleVictimMarkers[id]
-            if (marker == null) {
-                addPossibleVictim(pv)
-            } else {
-                updatePossibleVictim(pv)
+                handlePossibleVictim(id, info, ranges, positions)
             }
         }
     }
+
+    private fun handleSarOperator(id: String, info: DeviceInfo) {
+        val position: LatLng = info.exactPosition ?: return
+
+        val sarMarker = sarOperatorMarkers[id]
+        val name = info.personalInfo?.completeName ?: "Unknown"
+        val sar = SarOperatorTag(id, info.deviceName, name, position)
+
+        if (sarMarker == null) {
+            addSarOperator(sar)
+        } else {
+            updateSarOperator(sar)
+        }
+    }
+
+    private fun handlePossibleVictim(id: String, info: DeviceInfo, ranges: List<Double>, positions: List<LatLng>) {
+        val solver = Trilateration(positions, ranges)
+        val newPosition = info.exactPosition ?: solver.locate()
+
+        val pv = if (info.personalInfo != null) {
+            val name = info.personalInfo!!.completeName
+            val age = info.personalInfo!!.getAge()
+            val weight = info.personalInfo!!.weightKg
+            val hr = info.personalInfo!!.heartBPM
+
+            PossibleVictimTag(id, info.deviceName, name, newPosition, age, weight, hr)
+        } else {
+            PossibleVictimTag(id, info.deviceName, newPosition)
+        }
+
+        val marker = possibleVictimMarkers[id]
+        if (marker == null) {
+            addPossibleVictim(pv)
+        } else {
+            updatePossibleVictim(pv)
+        }
+    }
+
 }
