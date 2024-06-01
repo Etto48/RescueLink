@@ -124,7 +124,7 @@ class MapsActivity : AppCompatActivity(), OnLocationReceivedCallback, OnMapReady
             }
 
             val solver = Trilateration(positions, ranges)
-            val newPosition = solver.locate()
+            val newPosition = info.exactPosition ?: solver.locate()
 
             val pv = if (info.personalInfo != null) {
                 val name = info.personalInfo!!.completeName
