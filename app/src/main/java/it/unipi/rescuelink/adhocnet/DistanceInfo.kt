@@ -19,11 +19,7 @@ class DistanceInfo(
     }
 
     override fun hashCode(): Int {
-        val smallerDistanceInfo = object {
-            val sEstimatedDistance = estimatedDistance
-            val sMeasurementPosition = measurementPosition
-        }
-        return smallerDistanceInfo.hashCode()
+        return estimatedDistance.hashCode() xor measurementPosition.hashCode()
     }
 
     companion object {
