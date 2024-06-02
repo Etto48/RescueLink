@@ -29,6 +29,9 @@ import java.util.UUID
 
 class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
     Worker(appContext, workerParameters) {
+    companion object {
+        private const val TAG = "AdHocNet"
+    }
 
     private val infoCharacteristic = BluetoothGattCharacteristic(
         UUID.fromString("9578d7f6-3fe4-404c-b2cc-841747b6163f"),
@@ -64,10 +67,10 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                     offset,
                     infoJSON.toByteArray()) != true
                 ) {
-                    Log.e("AdHocNet", "Failed to respond to read request")
+                    Log.e(TAG, "Failed to respond to read request")
                 }
             } else {
-                Log.e("AdHocNet", "Failed to respond to read characteristic")
+                Log.e(TAG, "Failed to respond to read characteristic")
             }
         }
     }
@@ -84,12 +87,12 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                 return
             }
             if (newState == BluetoothGatt.STATE_CONNECTED) {
-                Log.d("AdHocNet", "Connected to device \"${gatt.device.name}\"")
+                Log.d(TAG, "Connected to device \"${gatt.device.name}\"")
                 // connectedGattSet[gatt.device.address] = gatt
                 gatt.discoverServices()
             }
             if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                Log.d("AdHocNet", "Disconnected from device \"${gatt.device.name}\"")
+                Log.d(TAG, "Disconnected from device \"${gatt.device.name}\"")
                 connectedGattSet.remove(gatt.device.address)
             }
         }
@@ -98,7 +101,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
             if (gatt != null && status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("AdHocNet", "Discovered services for device \"${gatt.device.name}\"")
+                Log.d(TAG, "Discovered services for device \"${gatt.device.name}\"")
                 connectedGattSet[gatt.device.address] = gatt
             }
         }
@@ -109,7 +112,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
-            Log.e("AdHocNet", "Write characteristic not implemented")
+            Log.e(TAG, "Write characteristic not implemented")
         }
 
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -119,10 +122,10 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                 // TODO: check if gatt.device.address is consistent,
                 //  previously, it gave some errors during testing
                 RescueLink.info.merge(gatt.device.address, info)
-                Log.d("AdHocNet", "Data received from \"${gatt.device?.name}\": ${String(value)}")
+                Log.d(TAG, "Data received from \"${gatt.device?.name}\": ${String(value)}")
             } catch (e: JsonSyntaxException)
             {
-                Log.e("AdHocNet", "Failed to parse received JSON: $e")
+                Log.e(TAG, "Failed to parse received JSON: $e")
             }
         }
 
@@ -176,7 +179,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                         if (RescueLink.info.nearbyDevicesInfo[result.device.address] == null) {
                             val newInfo = DeviceInfo()
                             newInfo.deviceName = result.device.name
-                            Log.d("AdHocNet", "New device found: ${result.device.name}")
+                            Log.d(TAG, "New device found: ${result.device.name}")
                             newInfo.addDistanceInfo(distanceInfo)
                             RescueLink.info.nearbyDevicesInfo[result.device.address] = newInfo
                         } else {
@@ -191,12 +194,12 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
     private val advertiseCallback = object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
             super.onStartSuccess(settingsInEffect)
-            Log.d("AdHocNet", "BLE advertising started")
+            Log.d(TAG, "BLE advertising started")
         }
 
         override fun onStartFailure(errorCode: Int) {
             super.onStartFailure(errorCode)
-            Log.e("AdHocNet", "BLE advertising failed with error code $errorCode")
+            Log.e(TAG, "BLE advertising failed with error code $errorCode")
         }
     }
 
@@ -208,7 +211,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                 try {
                     start(bluetoothManager, bluetoothAdapter)
                 } catch (e: SecurityException) {
-                    Log.e("AdHocNet", "Missing permission")
+                    Log.e(TAG, "Missing permission")
                     return Result.failure()
                 }
             } else {
@@ -220,11 +223,11 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                     try {
                         loop()
                     } catch (e: SecurityException) {
-                        Log.e("AdHocNet", "Missing permission")
+                        Log.e(TAG, "Missing permission")
                         return Result.failure()
                     }
                 } else {
-                    Log.e("AdHocNet", "Bluetooth disabled")
+                    Log.e(TAG, "Bluetooth disabled")
                 }
                 runBlocking {
                     delay(RescueLink.UPDATE_INTERVAL_MS)
@@ -232,7 +235,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             }
         }
         else {
-            Log.e("AdHocNet", "This device does not support bluetooth")
+            Log.e(TAG, "This device does not support bluetooth")
             return Result.failure()
         }
     }
@@ -242,18 +245,18 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_ADVERTISE])
     private fun start(bluetoothManager: BluetoothManager, bluetoothAdapter: BluetoothAdapter) {
-        Log.d("AdHocNet", "Starting GATT server")
+        Log.d(TAG, "Starting GATT server")
         bluetoothGattServer = bluetoothManager.openGattServer(
             context,
             bluetoothGattServerCallback
         )
         if (!infoService.addCharacteristic(infoCharacteristic))
         {
-            Log.e("AdHocNet", "Failed to add characteristic to service")
+            Log.e(TAG, "Failed to add characteristic to service")
         }
         if (this.bluetoothGattServer?.addService(infoService) != true)
         {
-            Log.e("AdHocNet", "Failed to add service to GATT server")
+            Log.e(TAG, "Failed to add service to GATT server")
         }
         var advertisingSettingsBuilder = AdvertiseSettings
             .Builder()
@@ -263,7 +266,7 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             advertisingSettingsBuilder = advertisingSettingsBuilder.setDiscoverable(true)
         }
-        Log.i("AdHocNet", "AdHocNetWorker started on device \"${bluetoothAdapter.name}\"")
+        Log.i(TAG, "AdHocNetWorker started on device \"${bluetoothAdapter.name}\"")
         bluetoothAdapter.bluetoothLeAdvertiser.startAdvertising(
             advertisingSettingsBuilder.build(),
             AdvertiseData
@@ -282,15 +285,15 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             val service = gatt.getService(infoService.uuid)
             val characteristic = service?.getCharacteristic(infoCharacteristic.uuid)
             if (characteristic != null) {
-                Log.d("AdHocNet", "Reading characteristic for device \"${gatt.device.name}\"")
+                Log.d(TAG, "Reading characteristic for device \"${gatt.device.name}\"")
                 gatt.readCharacteristic(characteristic)
             } else {
                 if (service == null) {
-                    Log.e("AdHocNet", "Service not found for device \"${gatt.device.name}\"")
-                    Log.i("AdHocNet", "Services: ${gatt.services}")
+                    Log.e(TAG, "Service not found for device \"${gatt.device.name}\"")
+                    Log.i(TAG, "Services: ${gatt.services}")
                 } else {
-                    Log.e("AdHocNet", "Characteristic not found for device \"${gatt.device.name}\"")
-                    Log.i("AdHocNet", "Characteristics: ${service.characteristics}")
+                    Log.e(TAG, "Characteristic not found for device \"${gatt.device.name}\"")
+                    Log.i(TAG, "Characteristics: ${service.characteristics}")
                 }
                 gatt.discoverServices()
             }
