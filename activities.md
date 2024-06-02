@@ -17,10 +17,18 @@
 
 ## Ettore's activities
 
+- 4,066 rows added
+- 1,104 rows removed
+- 57 commits
+
 - Across multiple days
   Researched how to implement a BLE ad-hoc network
 
 ## Paolo's activities
+
+- 3,597 rows added
+- 2,028 rows removed
+- 34 commits
 
 - Across multiple days
   Researched how to implement trilateration
