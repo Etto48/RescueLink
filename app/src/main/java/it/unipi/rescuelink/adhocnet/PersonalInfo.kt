@@ -1,21 +1,19 @@
 package it.unipi.rescuelink.adhocnet
 
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.Period
-import java.time.ZoneId
-import java.util.Date
 
+@Serializable
 class PersonalInfo(
     var completeName: String,
     var heartBPM: Double,
     var weightKg: Double,
-    var dateOfBirth: Date
+    var dateOfBirth: String
 ){
     fun getAge(): Int {
         val today = LocalDate.now()
-        val bd = dateOfBirth.toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        val bd = LocalDate.parse(dateOfBirth)
         val years = Period.between(bd, today).years
         return years
     }

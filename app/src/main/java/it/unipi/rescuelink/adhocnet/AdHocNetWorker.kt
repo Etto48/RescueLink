@@ -21,7 +21,6 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.google.gson.JsonSyntaxException
 import it.unipi.rescuelink.RescueLink
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -43,6 +42,8 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         BluetoothGattService.SERVICE_TYPE_PRIMARY
     )
 
+    private var requestBuffers = mutableMapOf<String, ByteArray>()
+
     private var context = appContext
 
     private var connectedGattSet = mutableMapOf<String,BluetoothGatt>()
@@ -58,19 +59,38 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             characteristic: BluetoothGattCharacteristic?
         ) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
-            val infoJSON = RescueLink.info.toJSON()
-            if (device != null && characteristic != null && characteristic.uuid == infoCharacteristic.uuid) {
-                if (bluetoothGattServer?.sendResponse(
+            if (device == null ||
+                characteristic == null ||
+                characteristic.uuid != infoCharacteristic.uuid
+            ) {
+                Log.e(TAG, "Invalid read request")
+                return
+            }
+
+            if (requestBuffers[device.address] == null) {
+                requestBuffers[device.address] = RescueLink.info.toBinary()
+                Log.d(TAG, "Allocating buffer for device \"${device.address}\"")
+            }
+
+            val serializedInfo = requestBuffers[device.address]!!
+
+            if (offset + 22 >= serializedInfo.size) {
+                requestBuffers.remove(device.address)
+                Log.d(TAG, "Freeing buffer for device \"${device.address}\"")
+            }
+
+            Log.d(TAG, "Sending response to ${device.address} (offset: $offset / ${serializedInfo.size})")
+
+            if (bluetoothGattServer?.sendResponse(
                     device,
                     requestId,
                     BluetoothGatt.GATT_SUCCESS,
                     offset,
-                    infoJSON.toByteArray()) != true
-                ) {
-                    Log.e(TAG, "Failed to respond to read request")
-                }
-            } else {
-                Log.e(TAG, "Failed to respond to read characteristic")
+                    serializedInfo
+                        .sliceArray(offset until serializedInfo.size)
+                ) != true
+            ) {
+                Log.e(TAG, "Failed to respond to read request")
             }
         }
     }
@@ -118,14 +138,14 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         private fun onReadSuccess(gatt: BluetoothGatt, value: ByteArray) {
             try {
-                val info = RescueLink.Info.fromJSON(String(value))
+                val info = RescueLink.Info.fromBinary(value)
                 // TODO: check if gatt.device.address is consistent,
                 //  previously, it gave some errors during testing
                 RescueLink.info.merge(gatt.device.address, info)
-                Log.d(TAG, "Data received from \"${gatt.device?.name}\": ${String(value)}")
-            } catch (e: JsonSyntaxException)
+                Log.d(TAG, "Data received from \"${gatt.device?.name}\": ${info.toJSON()}")
+            } catch (e: Exception)
             {
-                Log.e(TAG, "Failed to parse received JSON: $e")
+                Log.e(TAG, "Failed to parse: $e")
             }
         }
 
@@ -167,23 +187,29 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
             super.onScanResult(callbackType, result)
             if (result != null) {
                 if (!connectedGattSet.containsKey(result.device.address)) {
-                    result.device.connectGatt(context, false, gattCallback)
-                    if (RescueLink.info.thisDeviceInfo.exactPosition != null) {
+                    val gatt = result.device.connectGatt(
+                        context,
+                        false,
+                        gattCallback,
+                        BluetoothDevice.TRANSPORT_LE,
+                        result.primaryPhy
+                    )
+                    if (RescueLink.info.thisDeviceInfo.getExactPosition() != null) {
                         val txPower = if (result.txPower == ScanResult.TX_POWER_NOT_PRESENT)
                             RescueLink.TYPICAL_TX_POWER
                         else
                             result.txPower
 
                         val distance = DistanceInfo.estimateDistance(result.rssi, txPower, true)
-                        val distanceInfo = DistanceInfo(distance, RescueLink.info.thisDeviceInfo.exactPosition!!)
-                        if (RescueLink.info.nearbyDevicesInfo[result.device.address] == null) {
+                        val distanceInfo = DistanceInfo(distance, Position.fromLatLng(RescueLink.info.thisDeviceInfo.getExactPosition()!!))
+                        if (RescueLink.info.nearbyDevicesInfo[gatt.device.address] == null) {
                             val newInfo = DeviceInfo()
-                            newInfo.deviceName = result.device.name
+                            newInfo.setDeviceName(result.device.name)
                             Log.d(TAG, "New device found: ${result.device.name}")
                             newInfo.addDistanceInfo(distanceInfo)
-                            RescueLink.info.nearbyDevicesInfo[result.device.address] = newInfo
+                            RescueLink.info.nearbyDevicesInfo[gatt.device.address] = newInfo
                         } else {
-                            RescueLink.info.nearbyDevicesInfo[result.device.address]!!.addDistanceInfo(distanceInfo)
+                            RescueLink.info.nearbyDevicesInfo[gatt.device.address]!!.addDistanceInfo(distanceInfo)
                         }
                     }
                 }

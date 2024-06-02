@@ -71,7 +71,7 @@ class LocationUpdateWorker(appContext: Context, workerParameters: WorkerParamete
     }
 
     private fun updateCurrentLocation(location: Location) {
-        RescueLink.info.thisDeviceInfo.exactPosition = LatLng(location.latitude, location.longitude)
+        RescueLink.info.thisDeviceInfo.setExactPosition(LatLng(location.latitude, location.longitude))
         sendLocationBroadcast(location)
     }
 

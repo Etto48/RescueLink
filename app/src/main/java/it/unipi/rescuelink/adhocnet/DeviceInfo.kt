@@ -1,13 +1,15 @@
 package it.unipi.rescuelink.adhocnet
 
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
+@Serializable
 class DeviceInfo(
-    exactPosition: LatLng? = null,
-    personalInfo: PersonalInfo? = null,
-    deviceName: String? = null,
-    isSAR: Boolean = false,
+    private var exactPosition: Position? = null,
+    private var personalInfo: PersonalInfo? = null,
+    private var deviceName: String? = null,
+    private var isSAR: Boolean = false,
     var knownDistances: MutableList<DistanceInfo>? = null
 ) {
     private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
@@ -16,29 +18,41 @@ class DeviceInfo(
         const val MAX_KNOWN_DISTANCES = 5
     }
 
-    var exactPosition: LatLng? = exactPosition
-        set(value) {
-            field = value
-            updateTimestamp()
-        }
+    fun setExactPosition(value: LatLng?) {
+        exactPosition = if (value == null) null else Position.fromLatLng(value)
+        updateTimestamp()
+    }
 
-    var personalInfo: PersonalInfo? = personalInfo
-        set(value) {
-            field = value
-            updateTimestamp()
-        }
+    fun setPersonalInfo(value: PersonalInfo?) {
+        personalInfo = value
+        updateTimestamp()
+    }
 
-    var deviceName: String? = deviceName
-        set(value) {
-            field = value
-            updateTimestamp()
-        }
+    fun setDeviceName(value: String?) {
+        deviceName = value
+        updateTimestamp()
+    }
 
-    var isSAR: Boolean = isSAR
-        set(value) {
-            field = value
-            updateTimestamp()
-        }
+    fun setIsSAR(value: Boolean) {
+        isSAR = value
+        updateTimestamp()
+    }
+
+    fun getExactPosition(): LatLng? {
+        return exactPosition?.toLatLng()
+    }
+
+    fun getPersonalInfo(): PersonalInfo? {
+        return personalInfo
+    }
+
+    fun getDeviceName(): String? {
+        return deviceName
+    }
+
+    fun getIsSAR(): Boolean {
+        return isSAR
+    }
 
     fun addDistanceInfo(distanceInfo: DistanceInfo) {
         if (knownDistances == null)
