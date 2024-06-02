@@ -16,7 +16,7 @@ import kotlin.math.pow
 
 class DebugActivity : AppCompatActivity() {
 
-    var adapter: ArrayAdapter<String>? = null
+    private var adapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +49,9 @@ class DebugActivity : AppCompatActivity() {
     }
 
     private fun deviceToString(address: String, deviceInfo: DeviceInfo): String {
-        val a = ECEF.latLngToECEF(RescueLink.info.thisDeviceInfo.exactPosition!!)
-        val b = if (deviceInfo.exactPosition != null && RescueLink.info.thisDeviceInfo.exactPosition != null) {
-            ECEF.latLngToECEF(deviceInfo.exactPosition!!)
+        val a = ECEF.latLngToECEF(RescueLink.info.thisDeviceInfo.getExactPosition()!!)
+        val b = if (deviceInfo.getExactPosition() != null && RescueLink.info.thisDeviceInfo.getExactPosition() != null) {
+            ECEF.latLngToECEF(deviceInfo.getExactPosition()!!)
         } else if (deviceInfo.knownDistances != null) {
             val points = mutableListOf<LatLng>()
             val ranges = mutableListOf<Double>()
@@ -59,7 +59,7 @@ class DebugActivity : AppCompatActivity() {
                 a
             } else {
                 for (measurement in deviceInfo.knownDistances!!) {
-                    points.add(measurement.measurementPosition)
+                    points.add(measurement.measurementPosition.toLatLng())
                     ranges.add(measurement.estimatedDistance)
                 }
                 val trilateration = Trilateration(points, ranges)
@@ -76,8 +76,8 @@ class DebugActivity : AppCompatActivity() {
                     (a.z - b.z).pow(2))
                 .pow(0.5)
 
-        val sar = if (deviceInfo.isSAR) "SAR" else "PV"
+        val sar = if (deviceInfo.getIsSAR()) "SAR" else "PV"
 
-        return "$address $sar ${deviceInfo.deviceName} ${distance}m"
+        return "$address $sar ${deviceInfo.getDeviceName()} ${distance}m"
     }
 }

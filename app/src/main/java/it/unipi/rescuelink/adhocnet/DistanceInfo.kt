@@ -1,14 +1,15 @@
 package it.unipi.rescuelink.adhocnet
 
-import com.google.android.gms.maps.model.LatLng
+import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.math.pow
 
+@Serializable
 class DistanceInfo(
     // The estimated distance between two devices in meters
     var estimatedDistance: Double,
-    var measurementPosition: LatLng,
+    var measurementPosition: Position,
 ) {
     val timestamp: Long = OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond()
 

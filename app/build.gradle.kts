@@ -1,4 +1,5 @@
 plugins {
+    kotlin("plugin.serialization") version "2.0.0"
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
@@ -42,6 +43,9 @@ android {
 dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     val core_version = "1.13.1"
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.6.2")
 
     // Java language implementation
     implementation("androidx.core:core:$core_version")

@@ -38,7 +38,7 @@ class UserInfoActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             saveUserData()
-            RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
+            RescueLink.info.thisDeviceInfo.setPersonalInfo(userInfoManager.loadPersonalInfo())
             Toast.makeText(this, R.string.saved_message, Toast.LENGTH_SHORT).show()
         }
 

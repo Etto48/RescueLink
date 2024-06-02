@@ -74,12 +74,12 @@ class MainActivity : AppCompatActivity() {
         val switchSARMode = findViewById<SwitchCompat>(R.id.switch_sar_mode)
         switchSARMode.setOnCheckedChangeListener { _, isChecked -> changeSARMode(isChecked) }
         val userInfoManager = UserInfoManager(this)
-        RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
+        RescueLink.info.thisDeviceInfo.setPersonalInfo(userInfoManager.loadPersonalInfo())
 
         val buttonDebugActivity = findViewById<Button>(R.id.button_debugactivity)
         buttonDebugActivity.setOnClickListener {changeToDebugView()}
 
-        changeSARMode(RescueLink.info.thisDeviceInfo.isSAR)
+        changeSARMode(RescueLink.info.thisDeviceInfo.getIsSAR())
     }
 
     override fun onStart() {
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         maps.alpha = if (isChecked) 1.0f else 0.0f
         debug.alpha = if (isChecked) 1.0f else 0.0f
 
-        RescueLink.info.thisDeviceInfo.isSAR = isChecked
+        RescueLink.info.thisDeviceInfo.setIsSAR(isChecked)
     }
 
     private fun changeToUserInfoView() {
@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
                 ).build()
             WorkManager
                 .getInstance(applicationContext)
-                .enqueueUniquePeriodicWork("AdHocNet", ExistingPeriodicWorkPolicy.KEEP, workRequest)
+                .enqueueUniquePeriodicWork("AdHocNet", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, workRequest)
         }
     }
 
@@ -234,6 +234,6 @@ class MainActivity : AppCompatActivity() {
             ).build()
         WorkManager
             .getInstance(applicationContext)
-            .enqueueUniquePeriodicWork("LocationUpdate", ExistingPeriodicWorkPolicy.KEEP, workRequest)
+            .enqueueUniquePeriodicWork("LocationUpdate", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, workRequest)
     }
 }

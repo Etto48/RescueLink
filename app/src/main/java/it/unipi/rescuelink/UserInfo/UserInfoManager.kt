@@ -30,7 +30,7 @@ class UserInfoManager(context: Context) {
         val weightValue = weight?.toDoubleOrNull() ?: 0.0
         val birthDateValue = birthDate?.let { stringToDate(it) } ?: Date()
 
-        return PersonalInfo(fullName, 0.0, weightValue, birthDateValue)
+        return PersonalInfo(fullName, 0.0, weightValue, birthDateValue.toString())
     }
 
     private fun stringToDate(dateString: String): Date? {

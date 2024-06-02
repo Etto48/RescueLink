@@ -15,6 +15,9 @@ playServicesLocation = "21.2.0"
 workRuntimeKtx = "2.9.0"
 orgJetbrainsKotlinPluginSerializationGradlePlugin = "2.0.0"
 swiperefreshlayout = "1.1.0"
+kryo = "5.6.0"
+kotlinxSerializationCbor = "1.7.0-RC"
+kotlinxSerializationCore = "1.7.0-RC"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +34,9 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 org-jetbrains-kotlin-plugin-serialization-gradle-plugin = { group = "org.jetbrains.kotlin.plugin.serialization", name = "org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "orgJetbrainsKotlinPluginSerializationGradlePlugin" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+kryo = { group = "com.esotericsoftware", name = "kryo", version.ref = "kryo" }
+kotlinx-serialization-cbor = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-cbor", version.ref = "kotlinxSerializationCbor" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
