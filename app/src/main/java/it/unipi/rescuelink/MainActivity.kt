@@ -61,20 +61,34 @@ class MainActivity : AppCompatActivity() {
         buttonUserInfoActivity.setOnClickListener {changeToUserInfoView()}
 
         val switchSARMode = findViewById<SwitchCompat>(R.id.switch_sar_mode)
-        switchSARMode.setOnCheckedChangeListener { _, isChecked ->
-            RescueLink.info.thisDeviceInfo.isSAR = isChecked
-        }
+        switchSARMode.setOnCheckedChangeListener { _, isChecked -> changeSARMode(isChecked) }
         val userInfoManager = UserInfoManager(this)
         RescueLink.info.thisDeviceInfo.personalInfo = userInfoManager.loadPersonalInfo()
 
         val buttonDebugActivity = findViewById<Button>(R.id.button_debugactivity)
         buttonDebugActivity.setOnClickListener {changeToDebugView()}
 
+        changeSARMode(RescueLink.info.thisDeviceInfo.isSAR)
     }
 
     override fun onStart() {
         super.onStart()
         getPermissions()
+    }
+
+    private fun changeSARMode(isChecked: Boolean) {
+        val switch = findViewById<SwitchCompat>(R.id.switch_sar_mode)
+        switch.isChecked = isChecked
+
+        val maps = findViewById<Button>(R.id.button_mapsactivity)
+        val debug = findViewById<Button>(R.id.button_debugactivity)
+        maps.isEnabled = isChecked
+        debug.isEnabled = isChecked
+        // hide the button if the SAR mode is disabled
+        maps.alpha = if (isChecked) 1.0f else 0.0f
+        debug.alpha = if (isChecked) 1.0f else 0.0f
+
+        RescueLink.info.thisDeviceInfo.isSAR = isChecked
     }
 
     private fun changeToUserInfoView() {
