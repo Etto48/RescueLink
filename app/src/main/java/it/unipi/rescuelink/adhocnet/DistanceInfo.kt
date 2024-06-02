@@ -25,7 +25,9 @@ class DistanceInfo(
     companion object {
         fun estimateDistance(rssi: Int, txPower: Int, indoor: Boolean = false): Double {
             val pathLossExponent = if (indoor) 3.0 else 2.0
-            return 10.0.pow((txPower - rssi)/(10 * pathLossExponent))
+            val distance = 10.0.pow((txPower - rssi)/(10 * pathLossExponent))
+            // clamp between 0 and 200 meters
+            return distance.coerceIn(0.0, 200.0)
         }
     }
 }

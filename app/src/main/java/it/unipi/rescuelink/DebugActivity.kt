@@ -8,6 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.maps.model.LatLng
+import it.unipi.rescuelink.adhocnet.DeviceInfo
+import it.unipi.rescuelink.trilateration.ECEF
+import it.unipi.rescuelink.trilateration.Trilateration
+import kotlin.math.pow
 
 class DebugActivity : AppCompatActivity() {
 
@@ -39,7 +44,40 @@ class DebugActivity : AppCompatActivity() {
     private fun update() {
         adapter?.clear()
         for ((address, deviceInfo) in RescueLink.info.nearbyDevicesInfo) {
-            adapter?.add("${address}->${deviceInfo.deviceName} (${deviceInfo.knownDistances?.size ?: 0})")
+            adapter?.add(deviceToString(address,deviceInfo))
         }
+    }
+
+    private fun deviceToString(address: String, deviceInfo: DeviceInfo): String {
+        val a = ECEF.latLngToECEF(RescueLink.info.thisDeviceInfo.exactPosition!!)
+        val b = if (deviceInfo.exactPosition != null && RescueLink.info.thisDeviceInfo.exactPosition != null) {
+            ECEF.latLngToECEF(deviceInfo.exactPosition!!)
+        } else if (deviceInfo.knownDistances != null) {
+            val points = mutableListOf<LatLng>()
+            val ranges = mutableListOf<Double>()
+            if (deviceInfo.knownDistances!!.size < 3) {
+                a
+            } else {
+                for (measurement in deviceInfo.knownDistances!!) {
+                    points.add(measurement.measurementPosition)
+                    ranges.add(measurement.estimatedDistance)
+                }
+                val trilateration = Trilateration(points, ranges)
+                ECEF.latLngToECEF(trilateration.locate())
+            }
+        }
+        else {
+            a
+        }
+
+        val distance =
+            ((a.x - b.x).pow(2) +
+                    (a.y - b.y).pow(2) +
+                    (a.z - b.z).pow(2))
+                .pow(0.5)
+
+        val sar = if (deviceInfo.isSAR) "SAR" else "PV"
+
+        return "$address $sar ${deviceInfo.deviceName} ${distance}m"
     }
 }

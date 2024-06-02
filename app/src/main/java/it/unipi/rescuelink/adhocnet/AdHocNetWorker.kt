@@ -166,7 +166,12 @@ class AdHocNetWorker(appContext: Context, workerParameters: WorkerParameters) :
                 if (!connectedGattSet.containsKey(result.device.address)) {
                     result.device.connectGatt(context, false, gattCallback)
                     if (RescueLink.info.thisDeviceInfo.exactPosition != null) {
-                        val distance = DistanceInfo.estimateDistance(result.rssi, result.txPower)
+                        val txPower = if (result.txPower == ScanResult.TX_POWER_NOT_PRESENT)
+                            RescueLink.TYPICAL_TX_POWER
+                        else
+                            result.txPower
+
+                        val distance = DistanceInfo.estimateDistance(result.rssi, txPower, true)
                         val distanceInfo = DistanceInfo(distance, RescueLink.info.thisDeviceInfo.exactPosition!!)
                         if (RescueLink.info.nearbyDevicesInfo[result.device.address] == null) {
                             val newInfo = DeviceInfo()

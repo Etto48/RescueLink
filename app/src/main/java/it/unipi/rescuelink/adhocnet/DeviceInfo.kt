@@ -7,7 +7,7 @@ class DeviceInfo(
     exactPosition: LatLng? = null,
     personalInfo: PersonalInfo? = null,
     deviceName: String? = null,
-    var isSAR: Boolean = false,
+    isSAR: Boolean = false,
     var knownDistances: MutableList<DistanceInfo>? = null
 ) {
     private var timestamp: Long = OffsetDateTime.now().toEpochSecond()
@@ -29,6 +29,12 @@ class DeviceInfo(
         }
 
     var deviceName: String? = deviceName
+        set(value) {
+            field = value
+            updateTimestamp()
+        }
+
+    var isSAR: Boolean = isSAR
         set(value) {
             field = value
             updateTimestamp()

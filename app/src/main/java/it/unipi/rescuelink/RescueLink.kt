@@ -53,6 +53,7 @@ class RescueLink : Application() {
     companion object {
         /** This object stores the information about nearby devices and this device **/
         var info = Info()
-        const val UPDATE_INTERVAL_MS = 1500L
+        const val UPDATE_INTERVAL_MS = 10000L
+        const val TYPICAL_TX_POWER = -59
     }
 }
