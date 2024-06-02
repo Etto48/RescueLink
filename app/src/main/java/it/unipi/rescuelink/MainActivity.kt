@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted: Map<String, @JvmSuppressWildcards Boolean> ->
         if (isGranted.all { it.value }) {
-            startBackgroundWorkers()
+            requestBackgroundLocation()
         } else {
             for (permission in isGranted) {
                 if (!permission.value) {
@@ -121,7 +121,6 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_ADVERTISE
             )
@@ -132,7 +131,6 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.BLUETOOTH_ADMIN
             )
         }
@@ -155,11 +153,27 @@ class MainActivity : AppCompatActivity() {
 
         if (permissionSet.isEmpty())
         {
-            startBackgroundWorkers()
+            requestBackgroundLocation()
         }
         else
         {
             requestPermissionLauncher.launch(permissionSet)
+        }
+    }
+
+    private fun requestBackgroundLocation()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                0
+            )
+        }
+        else
+        {
+            startBackgroundWorkers()
         }
     }
 
