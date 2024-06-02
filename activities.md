@@ -12,6 +12,8 @@
   (Ettore and Paolo) online (nightly) meeting to clarify how the location works
 - 01/06/2024
   (Ettore and Paolo) online meeting to conclude the conclude the project
+- 02/06/2024
+  (Ettore an Paolo) online meeting to finalize the documentation and fix the last bugs
 
 ## Ettore's activities
 
