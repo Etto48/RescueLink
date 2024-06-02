@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">RescueLink</string>
     <string name="sar_mode">SAR Mode</string>
-    <string name="title_activity_maps">MapsActivity</string>
-    <string name="title_activity_debug">DebugActivity</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_debug">Devices</string>
     <string name="tag_age">Age: </string>
     <string name="tag_weight">Weight: </string>
     <string name="tag_heart_rate">HR: </string>
@@ -10,9 +10,9 @@
     <string name="unknown_device_name">Unknown Device</string>
     <string name="current_location">Current Location</string>
     <string name="possible_victim">Possible Victim</string>
-    <string name="title_activity_info">UserInfoActivity</string>
+    <string name="title_activity_info">Settings</string>
     <string name="name_userinfo">Name</string>
-    <string name="surname_userinfo">Surename</string>
+    <string name="surname_userinfo">Surname</string>
     <string name="birthdate_userinfo">Date of birth</string>
     <string name="weight_userinfo">Weight</string>
     <string name="save_userinfo">Save</string>
