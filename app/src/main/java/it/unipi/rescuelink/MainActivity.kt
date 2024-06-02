@@ -45,6 +45,17 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
     }
+
+    private val requestBackgroundLocationLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startBackgroundWorkers()
+        } else {
+            Toast.makeText(this, "Background location is required to use the app", Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -163,13 +174,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestBackgroundLocation()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        {
-            ActivityCompat.requestPermissions(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ActivityCompat.checkSelfPermission(
                 this,
-                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                0
-            )
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        )
+        {
+            requestBackgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
         else
         {
