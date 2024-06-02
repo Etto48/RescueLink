@@ -1,8 +1,16 @@
 \documentclass{article}
 \usepackage{multicol}
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
 \title{RescueLink: A Mobile Application for Victim Localization in Emergency Situations}
-\author{Paolo Palumbo, Ettore Ricci}
+\author{
+    Paolo Palumbo \\ 
+    \href{mailto:p.palumbo3@studenti.unipi.it}
+        {p.palumbo3@studenti.unipi.it}
+    \and Ettore Ricci \\ 
+    \href{mailto:e.ricci32@studenti.unipi.it}
+        {e.ricci32@studenti.unipi.it}}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -83,11 +91,77 @@ The formula used to estimate the distance is:
 \end{equation}
 We used $n=2$ as the path loss exponent because
 we expect a typical outdoor environment.
+\subsection{GATT}
+The Generic Attribute Profile (GATT) is a 
+specification that defines the way that two
+Bluetooth Low Energy devices transfer data back
+and forth in an opportunistic way
+using concepts called Services and Characteristics.
+A GATT service is a collection of characteristics
+and two connected devices can read, write, and
+be notified of changes to these characteristics.
+The maximum size of a characteristic is 512 bytes.
 \section{System Design}
+\subsection{Users}
+The application is designed for two types of users:
+\begin{itemize}
+    \item Search and Rescue operators (SAR)
+    \item Simple users (PV)
+\end{itemize}
 \subsection{Application Interface}
+\begin{multicols}{2}
+\begin{figure}[H]
+    \center
+    \includegraphics[width=2cm]{fig/map.jpg} 
+    \caption{In the map interface, 
+    the user can see the position of
+    SAR and PV devices.}
+\end{figure}
+\begin{figure}[H]
+    \center
+    \includegraphics[width=2cm]{fig/main.jpg}
+    \caption{In the main view a SAR user can
+    open the map or a list of detected devices.
+    Both a SAR and a PV user can open the settings
+    to edit their personal information.}
+\end{figure}
+\end{multicols}
+The application is designed to let only SAR 
+operators open the map interface and the device
+list. While both SAR and PV users can edit their
+personal information.
+In the map view, the user can select a device to
+display its information.
 \subsection{Data Sharing}
+The application uses a gossip protocol to share
+data along the ad-hoc BLE network. This is done 
+over a GATT service. The packet is in encoded in
+CBOR format and contains the device's information
+along with those of onother random device.
+\subsection{Localization}
+The application stores a number of 
+distance-position pairs both detected from the
+device with BLE and received from other devices.
+This enables even a sigle moving device to
+localize a victim exploiting its own position that
+changes over time and is obtained from GPS.
 \section{Results}
+The application was able to detect the location of
+a device within a 10 meter radius in an open field.
+For devices with the application installed, the
+localization error was reduced to the error of the
+GPS.
 \section{Conclusion}
+A mobile application was developed to enhance the
+localization of victims in emergency situations.
+The application uses BLE technology to create an
+ad-hoc network and trilateration to estimate the
+victim's position.
+Further improvements could be made to the
+accuracy of the localization by using a more
+advanced data selection algorithm for the 
+gossip protocol and a more accurate or dynamic
+path loss model.
 \end{multicols}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
